@@ -19,28 +19,28 @@ export function Footer({  }: FooterProps) {
             <h4 className="mb-4">Navigation</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <button 
-                  onClick={() => window.location.href =('home')}
+                <a 
+                  href={'/'}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Accueil
-                </button>
+                </a>
               </li>
               <li>
-                <button 
-                  onClick={() => window.location.href =('dashboard')}
+                <a 
+                  href={'dashboard'}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Recherche de centres
-                </button>
+                </a>
               </li>
               <li>
-                <button 
-                  onClick={() => window.location.href =('help')}
+                <a 
+                  href={'help'}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Aide & FAQ
-                </button>
+                </a>
               </li>
             </ul>
           </div>
@@ -49,28 +49,28 @@ export function Footer({  }: FooterProps) {
             <h4 className="mb-4">Support</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <button 
-                  onClick={() => window.location.href =('contact')}
+                <a 
+                  href={'contact'}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Contact
-                </button>
+                </a>
               </li>
               <li>
-                <button 
-                  onClick={() => window.location.href =('accessibility')}
+                <a 
+                  href={'accessibility'}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Accessibilité du site
-                </button>
+                </a>
               </li>
               <li>
-                <button 
-                  onClick={() => window.location.href =('sitemap')}
+                <a 
+                  href={'sitemap'}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Plan du site
-                </button>
+                </a>
               </li>
             </ul>
           </div>
@@ -79,35 +79,35 @@ export function Footer({  }: FooterProps) {
             <h4 className="mb-4">Légal</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <button 
-                  onClick={() => window.location.href =('legal')}
+                <a 
+                  href={'legal'}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Mentions légales
-                </button>
+                </a>
               </li>
               <li>
-                <button 
-                  onClick={() => window.location.href =('privacy')}
+                <a 
+                  href={'privacy'}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Politique de confidentialité
-                </button>
+                </a>
               </li>
               <li>
-                <button 
-                  onClick={() => window.location.href =('cgu')}
+                <a 
+                  href={'cgu'}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   CGU
-                </button>
+                </a>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>© 2024 AccessiSanté. Tous droits réservés.</p>
+          <p>© 2025 MyAccess. Tous droits réservés.</p>
           <p className="mt-2">
             Plateforme dédiée à l'accessibilité des centres de santé pour tous.
           </p>

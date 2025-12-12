@@ -1,18 +1,18 @@
 "use client"
 
 import { Bell, User, LogOut, Menu } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Center, User as UserType } from '../../types';
+} from '@/components/ui/dropdown-menu';
+import { Center, User as UserType } from '@/types';
 import { useEffect, useState } from 'react';
-import { getCenter, getCurrentUser, getNotifications, setCurrentUser } from '@/src/lib/mockData';
+import { getCenter, getCurrentUser, getNotifications, setCurrentUser } from '@/lib/mockData';
 
 type Page = 
   | 'home' 
@@ -98,7 +98,7 @@ export function Header({ }: HeaderProps) {
     <header className="border-b bg-white sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <button onClick={() => window.location.href = (user ? 'dashboard' : 'home')} className="flex items-center gap-2">
+          <button onClick={() => window.location.href = (user ? 'dashboard' : '/')} className="flex items-center gap-2">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
               <span className="sr-only">Logo</span>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -108,7 +108,7 @@ export function Header({ }: HeaderProps) {
               </svg>
             </div>
             <div className="flex flex-col items-start">
-              <span className="tracking-tight">AccessiSanté</span>
+              <span className="tracking-tight">MyAccess</span>
               <span className="text-xs text-muted-foreground">Centres accessibles</span>
             </div>
           </button>

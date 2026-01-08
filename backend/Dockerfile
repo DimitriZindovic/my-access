@@ -27,8 +27,13 @@ RUN mkdir -p /etc/supervisor/conf.d && \
     echo 'server { listen 8080; root /var/www/html/public; index index.php; location / { try_files $uri $uri/ /index.php?$query_string; } location ~ \.php$ { fastcgi_pass 127.0.0.1:9000; fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name; include fastcgi_params; } }' > /etc/nginx/http.d/default.conf && \
     echo '[supervisord]\nnodaemon=true\n[program:php-fpm]\ncommand=php-fpm\nautostart=true\nautorestart=true\n[program:nginx]\ncommand=nginx -g "daemon off;"\nautostart=true\nautorestart=true' > /etc/supervisor/conf.d/supervisord.conf
 
-RUN echo '#!/bin/sh\nphp artisan migrate --force || true\nphp artisan config:cache || true\nphp artisan route:cache || true\nexec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf' > /entrypoint.sh && chmod +x /entrypoint.sh
+RUN echo '#!/bin/sh' > /entrypoint.sh && \
+    echo 'php artisan migrate --force || true' >> /entrypoint.sh && \
+    echo 'php artisan config:cache || true' >> /entrypoint.sh && \
+    echo 'php artisan route:cache || true' >> /entrypoint.sh && \
+    echo 'exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf' >> /entrypoint.sh && \
+    chmod +x /entrypoint.sh
 
 EXPOSE 8080
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]

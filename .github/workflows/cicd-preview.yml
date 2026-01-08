@@ -18,24 +18,8 @@ jobs:
 
       - name: Trigger Render Deploy (Backend)
         run: |
-          echo "Triggering Render deployment..."
-          response=$(curl -s -w "\n%{http_code}" -X POST \
-            "https://api.render.com/v1/services/${{ secrets.RENDER_BACKEND_SERVICE_ID }}/deploys" \
-            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
-            -H "Accept: application/json" \
-            -H "Content-Type: application/json")
-
-          http_code=$(echo "$response" | tail -n1)
-          body=$(echo "$response" | sed '$d')
-
-          if [ "$http_code" -eq 201 ] || [ "$http_code" -eq 200 ]; then
-            echo "✅ Deployment triggered successfully"
-            echo "$body" | jq '.' || echo "$body"
-          else
-            echo "❌ Failed to trigger deployment. HTTP $http_code"
-            echo "$body"
-            exit 1
-          fi
+          curl -X POST "https://api.render.com/deploy/srv/${{ secrets.RENDER_BACKEND_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}" \
+            -H "Accept: application/json"
 
   deploy-frontend:
     needs: deploy-backend

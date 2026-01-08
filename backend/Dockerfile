@@ -1,6 +1,6 @@
 FROM php:8.2-fpm-alpine
 
-RUN apk add --no-cache nginx supervisor postgresql-dev libpng-dev libzip-dev nodejs npm git curl
+RUN apk add --no-cache nginx supervisor postgresql-dev libpng-dev libzip-dev oniguruma-dev nodejs npm git curl
 
 RUN docker-php-ext-install pdo pdo_pgsql mbstring zip gd
 

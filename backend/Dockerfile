@@ -11,8 +11,10 @@ WORKDIR /var/www/html
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --optimize-autoloader
 
-COPY package.json package-lock.json ./
-RUN npm ci && npm run build
+COPY package.json package-lock.json vite.config.js ./
+COPY resources ./resources
+COPY public ./public
+RUN touch index.html && npm ci && npm run build && rm -f index.html
 
 COPY . .
 

@@ -9,12 +9,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --no-scripts --optimize-autoloader
 
 COPY package.json package-lock.json ./
 RUN npm ci && npm run build
 
 COPY . .
+
+RUN composer dump-autoload --optimize --classmap-authoritative --no-dev
 
 RUN chown -R www-data:www-data /var/www/html && \
     chmod -R 755 storage bootstrap/cache

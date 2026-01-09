@@ -166,12 +166,16 @@ export const mockReviews: Review[] = [
 // Add reviews to centers
 mockCenters[0].reviews = mockReviews.filter(r => r.centerId === '1');
 
+const isClient = typeof window !== 'undefined';
+
 export const getCurrentUser = (): User | null => {
+  if (!isClient) return null;
   const userStr = localStorage.getItem('currentUser');
   return userStr ? JSON.parse(userStr) : null;
 };
 
 export const setCurrentUser = (user: User | null) => {
+  if (!isClient) return;
   if (user) {
     localStorage.setItem('currentUser', JSON.stringify(user));
   } else {
@@ -180,12 +184,14 @@ export const setCurrentUser = (user: User | null) => {
 };
 
 export const getAppointments = (userId: string): Appointment[] => {
+  if (!isClient) return [];
   const appointmentsStr = localStorage.getItem('appointments');
   const allAppointments: Appointment[] = appointmentsStr ? JSON.parse(appointmentsStr) : [];
   return allAppointments.filter(apt => apt.userId === userId);
 };
 
 export const addAppointment = (appointment: Appointment) => {
+  if (!isClient) return;
   const appointmentsStr = localStorage.getItem('appointments');
   const allAppointments: Appointment[] = appointmentsStr ? JSON.parse(appointmentsStr) : [];
   allAppointments.push(appointment);
@@ -193,12 +199,14 @@ export const addAppointment = (appointment: Appointment) => {
 };
 
 export const getNotifications = (userId: string): Notification[] => {
+  if (!isClient) return [];
   const notificationsStr = localStorage.getItem('notifications');
   const allNotifications: Notification[] = notificationsStr ? JSON.parse(notificationsStr) : [];
   return allNotifications.filter(notif => notif.userId === userId);
 };
 
 export const addNotification = (notification: Notification) => {
+  if (!isClient) return;
   const notificationsStr = localStorage.getItem('notifications');
   const allNotifications: Notification[] = notificationsStr ? JSON.parse(notificationsStr) : [];
   allNotifications.push(notification);
@@ -206,6 +214,7 @@ export const addNotification = (notification: Notification) => {
 };
 
 export const markNotificationAsRead = (notificationId: string) => {
+  if (!isClient) return;
   const notificationsStr = localStorage.getItem('notifications');
   const allNotifications: Notification[] = notificationsStr ? JSON.parse(notificationsStr) : [];
   const updated = allNotifications.map(n => 
@@ -215,12 +224,14 @@ export const markNotificationAsRead = (notificationId: string) => {
 };
 
 export const getUserReviews = (userId: string): Review[] => {
+  if (!isClient) return [];
   const reviewsStr = localStorage.getItem('reviews');
   const allReviews: Review[] = reviewsStr ? JSON.parse(reviewsStr) : mockReviews;
   return allReviews.filter(r => r.userId === userId);
 };
 
 export const addReview = (review: Review) => {
+  if (!isClient) return;
   const reviewsStr = localStorage.getItem('reviews');
   const allReviews: Review[] = reviewsStr ? JSON.parse(reviewsStr) : [...mockReviews];
   allReviews.push(review);
@@ -228,11 +239,11 @@ export const addReview = (review: Review) => {
 };
 
 export const getCenters = (): Center[] => {
+  if (!isClient) return mockCenters;
   const centersStr = localStorage.getItem('centers');
   if (centersStr) {
     return JSON.parse(centersStr);
   }
-  // Initialize with mock data
   localStorage.setItem('centers', JSON.stringify(mockCenters));
   return mockCenters;
 };
@@ -243,13 +254,13 @@ export const getCenter = (id: string): Center | undefined => {
 };
 
 export const updateCenterWithReview = (centerId: string, review: Review) => {
+  if (!isClient) return;
   const centers = getCenters();
   const centerIndex = centers.findIndex(c => c.id === centerId);
   
   if (centerIndex !== -1) {
     centers[centerIndex].reviews.push(review);
     
-    // Recalculate global score
     const allReviews = centers[centerIndex].reviews;
     if (allReviews.length > 0) {
       const avgPhysique = allReviews.reduce((sum, r) => sum + r.scores.physique, 0) / allReviews.length;

@@ -13,6 +13,7 @@ import {
 import { Center, User as UserType } from '@/types';
 import { useEffect, useState } from 'react';
 import { getCenter, getCurrentUser, getNotifications, setCurrentUser } from '@/lib/mockData';
+import Link from 'next/link';
 
 type Page = 
   | 'home' 
@@ -101,7 +102,7 @@ export function Header({ }: HeaderProps) {
       </a>
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <button onClick={() => window.location.href = (user ? 'dashboard' : '/')} className="flex items-center gap-2">
+          <Link href={"/"} className="flex items-center gap-2">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
               <span className="sr-only">Logo</span>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -114,24 +115,24 @@ export function Header({ }: HeaderProps) {
               <span className="tracking-tight text-primary">MyAccess</span>
               <span className="text-xs text-muted-foreground">Centres accessibles</span>
             </div>
-          </button>
+          </Link>
 
           {user && (
             <nav className="hidden md:flex gap-6">
               <button 
-                onClick={() => window.location.href =('dashboard')}
+                onClick={() => window.location.href =('/dashboard')}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 Recherche
               </button>
               <button 
-                onClick={() => window.location.href =('appointments')}
+                onClick={() => window.location.href =('/appointments')}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 Mes rendez-vous
               </button>
               <button 
-                onClick={() => window.location.href =('help')}
+                onClick={() => window.location.href =('/help')}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 Aide
@@ -147,7 +148,7 @@ export function Header({ }: HeaderProps) {
                 variant="ghost"
                 size="icon"
                 className="relative"
-                onClick={() => window.location.href =('notifications')}
+                onClick={() => window.location.href =('/notifications')}
               >
                 <Bell className="h-5 w-5" />
                 {unreadNotifications > 0 && (

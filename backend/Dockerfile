@@ -25,7 +25,7 @@ RUN chown -R www-data:www-data /var/www/html && \
 
 RUN mkdir -p /etc/supervisor/conf.d && \
     echo 'server { listen 8080; root /var/www/html/public; index index.php; location / { try_files $uri $uri/ /index.php?$query_string; } location ~ \.php$ { fastcgi_pass 127.0.0.1:9000; fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name; include fastcgi_params; } }' > /etc/nginx/http.d/default.conf && \
-    echo '[supervisord]\nnodaemon=true\n[program:php-fpm]\ncommand=php-fpm\nautostart=true\nautorestart=true\n[program:nginx]\ncommand=nginx -g "daemon off;"\nautostart=true\nautorestart=true' > /etc/supervisor/conf.d/supervisord.conf
+    printf '[supervisord]\nnodaemon=true\n\n[program:php-fpm]\ncommand=php-fpm\nautostart=true\nautorestart=true\n\n[program:nginx]\ncommand=nginx -g "daemon off;"\nautostart=true\nautorestart=true\n' > /etc/supervisor/conf.d/supervisord.conf
 
 RUN echo '#!/bin/sh' > /entrypoint.sh && \
     echo 'php artisan migrate --force || true' >> /entrypoint.sh && \

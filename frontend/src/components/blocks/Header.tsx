@@ -96,6 +96,9 @@ export function Header({ }: HeaderProps) {
 
   return (
     <header className="border-b bg-white sticky top-0 z-50">
+      <a href="#main-content" className="sr-only focus:not-sr-only px-6 h-10 bg-primary text-primary-foreground rounded-md focus:absolute focus:top-4 focus:left-4">
+        Aller au contenu principal
+      </a>
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <button onClick={() => window.location.href = (user ? 'dashboard' : '/')} className="flex items-center gap-2">

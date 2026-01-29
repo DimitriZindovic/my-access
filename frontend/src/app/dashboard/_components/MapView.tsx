@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 interface MapViewProps {
   centers: Center[];
@@ -68,10 +69,10 @@ export function MapView({ centers, selectedCenter, onSelectCenter }: MapViewProp
                     </Badge>
                     <span className="text-xs text-muted-foreground">{center.city}</span>
                   </div>
-                  <Button
+                  <Link
+                    href={"center/" + center.id}
                     className='w-full text-center'
-                    onClick={() => onSelectCenter(center)}
-                  >Voir les détails</Button>
+                  >Voir les détails</Link>
                 </Popup>
             </Marker>
           );

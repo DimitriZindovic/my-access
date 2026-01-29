@@ -1,57 +1,76 @@
 import { Request, Response, NextFunction } from "express";
-import { supabase } from "../config/supabase.js";
+import { supabase } from "../lib/supabase";
 
 export interface AuthRequest extends Request {
   user?: {
     id: string;
-    email?: string;
-    [key: string]: any;
+    email: string;
   };
 }
 
-/**
- * Middleware to verify JWT token from Authorization header
- */
-export const authenticateToken = async (
+export async function authMiddleware(
   req: AuthRequest,
   res: Response,
   next: NextFunction
-): Promise<void> => {
+) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Token manquant ou invalide" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      res.status(401).json({
-        error: "Unauthorized",
-        message: "Missing or invalid authorization header",
-      });
-      return;
-    }
-
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-
-    // Verify token with Supabase
     const {
       data: { user },
       error,
     } = await supabase.auth.getUser(token);
 
     if (error || !user) {
-      res.status(401).json({
-        error: "Unauthorized",
-        message: "Invalid or expired token",
-      });
-      return;
+      return res.status(401).json({ error: "Token invalide ou expiré" });
     }
 
-    // Attach user to request object
-    req.user = user;
+    req.user = {
+      id: user.id,
+      email: user.email!,
+    };
+
     next();
   } catch (error) {
-    console.error("Auth middleware error:", error);
-    res.status(500).json({
-      error: "Internal server error",
-      message: "Error verifying authentication",
-    });
+    console.error("Erreur d'authentification:", error);
+    return res.status(500).json({ error: "Erreur d'authentification" });
   }
-};
+}
+
+// Middleware optionnel - n'échoue pas si pas de token
+export async function optionalAuthMiddleware(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return next();
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser(token);
+
+    if (user) {
+      req.user = {
+        id: user.id,
+        email: user.email!,
+      };
+    }
+  } catch (error) {
+    // Ignorer les erreurs, continuer sans utilisateur
+  }
+
+  next();
+}

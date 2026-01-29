@@ -1,16 +1,15 @@
 services:
   - type: web
     name: my-access-backend
-    env: node
-    plan: starter
-    buildCommand: rm -rf node_modules yarn.lock && npm install && npm run build
-    startCommand: npm start
+    runtime: node
+    buildCommand: npm install && npm run prisma:generate
+    startCommand: npm run dev
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 3001
-      - key: DATABASE_URL
+      - key: FRONTEND_URL
         sync: false
       - key: SUPABASE_URL
         sync: false
@@ -18,5 +17,7 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
-      - key: FRONTEND_URL
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_DIRECT_URL
         sync: false

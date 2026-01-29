@@ -1,302 +1,237 @@
-import express, { Request, Response } from "express";
-import { body, validationResult } from "express-validator";
-import { supabase } from "../config/supabase.js";
-import { authenticateToken, AuthRequest } from "../middleware/auth.js";
-import { prisma } from "../lib/prisma.js";
+import { Router, Request, Response } from "express";
+import { supabaseAdmin, supabase } from "../lib/supabase";
+import prisma from "../lib/prisma";
+import { authMiddleware, AuthRequest } from "../middleware/auth";
 
-const router = express.Router();
+const router = Router();
 
-/**
- * POST /api/auth/signup
- * Create a new user account
- */
-router.post(
-  "/signup",
-  [
-    body("email").isEmail().normalizeEmail(),
-    body("password").isLength({ min: 6 }),
-    body("firstName").optional().trim(),
-    body("lastName").optional().trim(),
-    body("phone").optional().trim(),
-    body("handicapType").optional().trim(),
-  ],
-  async (req: Request, res: Response): Promise<void> => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation error",
-          errors: errors.array(),
-        });
-        return;
-      }
+// POST /api/auth/signup - Inscription
+router.post("/signup", async (req: Request, res: Response) => {
+  try {
+    const { email, password, firstName, lastName, handicapType } = req.body;
 
-      const { email, password, firstName, lastName, phone, handicapType } =
-        req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email et mot de passe requis" });
+    }
 
-      // Create user in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+    // Créer l'utilisateur dans Supabase Auth
+    const { data: authData, error: authError } =
+      await supabaseAdmin.auth.admin.createUser({
         email,
         password,
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            phone: phone,
-            handicap_type: handicapType,
-          },
-        },
+        email_confirm: true, // Auto-confirmer l'email en dev
       });
 
-      if (authError) {
-        res.status(400).json({
-          error: "Signup failed",
-          message: authError.message,
-        });
-        return;
+    if (authError) {
+      console.error("Erreur Supabase Auth:", authError);
+      if (authError.message.includes("already registered")) {
+        return res.status(400).json({ error: "Cet email est déjà utilisé" });
       }
+      return res.status(400).json({ error: authError.message });
+    }
 
-      if (!authData.user) {
-        res.status(400).json({
-          error: "Signup failed",
-          message: "User creation failed",
-        });
-        return;
-      }
-
-      // Create user profile in database using Prisma
-      try {
-        await prisma.user.create({
-          data: {
-            id: authData.user.id,
-            email: email,
-            firstName: firstName || null,
-            lastName: lastName || null,
-            phone: phone || null,
-            handicapType: handicapType || null,
-          },
-        });
-      } catch (dbError: any) {
-        console.error("Profile creation error:", dbError);
-        // If profile creation fails, we should ideally rollback the auth user
-        // For now, we'll just log the error
-        if (dbError.code !== "P2002") {
-          // P2002 is unique constraint violation
-          throw dbError;
-        }
-      }
-
-      // Return user data
-      const user = {
+    // Créer le profil utilisateur dans la DB
+    const user = await prisma.user.create({
+      data: {
         id: authData.user.id,
-        email: authData.user.email,
+        email,
         firstName: firstName || null,
         lastName: lastName || null,
-        phone: phone || null,
         handicapType: handicapType || null,
-        createdAt: new Date().toISOString(),
-      };
+      },
+    });
 
-      res.status(201).json({
-        message: "User created successfully",
-        user,
-        session: authData.session,
-      });
-    } catch (error) {
-      console.error("Signup error:", error);
-      res.status(500).json({
-        error: "Internal server error",
-        message: "Failed to create user",
-      });
-    }
-  }
-);
-
-/**
- * POST /api/auth/login
- * Authenticate user and return session
- */
-router.post(
-  "/login",
-  [body("email").isEmail().normalizeEmail(), body("password").notEmpty()],
-  async (req: Request, res: Response): Promise<void> => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        res.status(400).json({
-          error: "Validation error",
-          errors: errors.array(),
-        });
-        return;
-      }
-
-      const { email, password } = req.body;
-
-      // Authenticate with Supabase
-      const { data: authData, error: authError } =
-        await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-      if (authError || !authData.user) {
-        res.status(401).json({
-          error: "Authentication failed",
-          message: "Invalid email or password",
-        });
-        return;
-      }
-
-      // Get user profile from database using Prisma
-      const profile = await prisma.user.findUnique({
-        where: { id: authData.user.id },
+    // Connecter l'utilisateur immédiatement
+    const { data: signInData, error: signInError } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      // Build user object
-      const user = {
-        id: authData.user.id,
-        email: authData.user.email || email,
-        firstName:
-          profile?.firstName || authData.user.user_metadata?.first_name || null,
-        lastName:
-          profile?.lastName || authData.user.user_metadata?.last_name || null,
-        phone: profile?.phone || authData.user.user_metadata?.phone || null,
-        handicapType:
-          profile?.handicapType ||
-          authData.user.user_metadata?.handicap_type ||
-          null,
-        createdAt: profile?.createdAt.toISOString() || authData.user.created_at,
-      };
-
-      res.json({
-        message: "Login successful",
-        user,
-        session: authData.session,
-      });
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({
-        error: "Internal server error",
-        message: "Failed to authenticate user",
+    if (signInError) {
+      return res.status(201).json({
+        message: "Compte créé avec succès. Veuillez vous connecter.",
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          handicapType: user.handicapType,
+        },
       });
     }
+
+    return res.status(201).json({
+      message: "Compte créé avec succès",
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        handicapType: user.handicapType,
+      },
+      session: {
+        accessToken: signInData.session?.access_token,
+        refreshToken: signInData.session?.refresh_token,
+        expiresAt: signInData.session?.expires_at,
+      },
+    });
+  } catch (error) {
+    console.error("Erreur inscription:", error);
+    return res.status(500).json({ error: "Erreur lors de l'inscription" });
   }
-);
+});
 
-/**
- * GET /api/auth/me
- * Get current authenticated user
- */
-router.get(
-  "/me",
-  authenticateToken,
-  async (req: AuthRequest, res: Response): Promise<void> => {
-    try {
-      const userId = req.user!.id;
-
-      // Get user profile from database using Prisma
-      const profile = await prisma.user.findUnique({
-        where: { id: userId },
-      });
-
-      if (!profile) {
-        res.status(404).json({
-          error: "Not found",
-          message: "User profile not found",
-        });
-        return;
-      }
-
-      // Build user object
-      const user = {
-        id: profile.id,
-        email: profile.email,
-        firstName: profile.firstName || null,
-        lastName: profile.lastName || null,
-        phone: profile.phone || null,
-        handicapType: profile.handicapType || null,
-        createdAt: profile.createdAt.toISOString(),
-      };
-
-      res.json({ user });
-    } catch (error) {
-      console.error("Get user error:", error);
-      res.status(500).json({
-        error: "Internal server error",
-        message: "Failed to get user data",
-      });
-    }
-  }
-);
-
-/**
- * POST /api/auth/logout
- * Logout current user
- */
-router.post(
-  "/logout",
-  authenticateToken,
-  async (req: AuthRequest, res: Response): Promise<void> => {
-    try {
-      const token = req.headers.authorization?.substring(7);
-
-      if (token) {
-        // Sign out the session
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-          console.error("Logout error:", error);
-        }
-      }
-
-      res.json({ message: "Logout successful" });
-    } catch (error) {
-      console.error("Logout error:", error);
-      res.status(500).json({
-        error: "Internal server error",
-        message: "Failed to logout",
-      });
-    }
-  }
-);
-
-/**
- * POST /api/auth/refresh
- * Refresh access token
- */
-router.post("/refresh", async (req: Request, res: Response): Promise<void> => {
+// POST /api/auth/login - Connexion
+router.post("/login", async (req: Request, res: Response) => {
   try {
-    const { refresh_token } = req.body;
+    const { email, password } = req.body;
 
-    if (!refresh_token) {
-      res.status(400).json({
-        error: "Bad request",
-        message: "Refresh token is required",
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email et mot de passe requis" });
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error("Erreur de connexion:", error);
+      return res.status(401).json({ error: "Email ou mot de passe incorrect" });
+    }
+
+    // Récupérer le profil utilisateur depuis la DB
+    let user = await prisma.user.findUnique({
+      where: { id: data.user.id },
+    });
+
+    // Si l'utilisateur n'existe pas dans la DB, le créer
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          id: data.user.id,
+          email: data.user.email!,
+        },
       });
-      return;
+    }
+
+    return res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        handicapType: user.handicapType,
+      },
+      session: {
+        accessToken: data.session?.access_token,
+        refreshToken: data.session?.refresh_token,
+        expiresAt: data.session?.expires_at,
+      },
+    });
+  } catch (error) {
+    console.error("Erreur connexion:", error);
+    return res.status(500).json({ error: "Erreur lors de la connexion" });
+  }
+});
+
+// POST /api/auth/logout - Déconnexion
+router.post("/logout", authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader?.split(" ")[1];
+
+    if (token) {
+      await supabase.auth.signOut();
+    }
+
+    return res.json({ message: "Déconnexion réussie" });
+  } catch (error) {
+    console.error("Erreur déconnexion:", error);
+    return res.status(500).json({ error: "Erreur lors de la déconnexion" });
+  }
+});
+
+// GET /api/auth/me - Obtenir l'utilisateur courant
+router.get("/me", authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user!.id },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "Utilisateur non trouvé" });
+    }
+
+    return res.json({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      handicapType: user.handicapType,
+      createdAt: user.createdAt,
+    });
+  } catch (error) {
+    console.error("Erreur récupération profil:", error);
+    return res.status(500).json({ error: "Erreur lors de la récupération du profil" });
+  }
+});
+
+// PUT /api/auth/me - Mettre à jour le profil
+router.put("/me", authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const { firstName, lastName, handicapType, phone } = req.body;
+
+    const user = await prisma.user.update({
+      where: { id: req.user!.id },
+      data: {
+        firstName,
+        lastName,
+        handicapType,
+        phone,
+      },
+    });
+
+    return res.json({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      handicapType: user.handicapType,
+      phone: user.phone,
+    });
+  } catch (error) {
+    console.error("Erreur mise à jour profil:", error);
+    return res.status(500).json({ error: "Erreur lors de la mise à jour du profil" });
+  }
+});
+
+// POST /api/auth/refresh - Rafraîchir le token
+router.post("/refresh", async (req: Request, res: Response) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({ error: "Refresh token requis" });
     }
 
     const { data, error } = await supabase.auth.refreshSession({
-      refresh_token,
+      refresh_token: refreshToken,
     });
 
-    if (error || !data.session) {
-      res.status(401).json({
-        error: "Invalid refresh token",
-        message: "Failed to refresh session",
-      });
-      return;
+    if (error) {
+      return res.status(401).json({ error: "Token invalide ou expiré" });
     }
 
-    res.json({
-      message: "Token refreshed successfully",
-      session: data.session,
+    return res.json({
+      accessToken: data.session?.access_token,
+      refreshToken: data.session?.refresh_token,
+      expiresAt: data.session?.expires_at,
     });
   } catch (error) {
-    console.error("Refresh token error:", error);
-    res.status(500).json({
-      error: "Internal server error",
-      message: "Failed to refresh token",
-    });
+    console.error("Erreur rafraîchissement token:", error);
+    return res.status(500).json({ error: "Erreur lors du rafraîchissement du token" });
   }
 });
 

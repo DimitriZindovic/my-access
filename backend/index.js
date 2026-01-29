@@ -8,25 +8,36 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(",").map((url) => url.trim())
+  : ["http://localhost:3000"];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
 app.use("/api/auth", authRoutes);
 
-// Route de santé
 app.get("/health", (req, res) => {
   res.json({ status: "ok", message: "Backend is running" });
 });
 
-// Route de test de connexion DB (optionnel - pour tester la connexion)
 app.get("/api/test-db", async (req, res) => {
   try {
     const sql = (await import("./config/db.js")).default;
@@ -38,9 +49,6 @@ app.get("/api/test-db", async (req, res) => {
       ...result[0],
     });
   } catch (error) {
-    console.error("Erreur connexion DB:", error);
-
-    // Messages d'erreur plus détaillés
     let errorMessage = error.message;
     let helpfulHint = "";
 
@@ -64,19 +72,12 @@ app.get("/api/test-db", async (req, res) => {
   }
 });
 
-// Gestion des erreurs 404
 app.use((req, res) => {
   res.status(404).json({ error: "Route non trouvée" });
 });
 
-// Gestion des erreurs globales
 app.use((err, req, res, next) => {
-  console.error("Erreur serveur:", err);
   res.status(500).json({ error: "Erreur serveur interne" });
 });
 
-// Démarrer le serveur
-app.listen(PORT, () => {
-  console.log(`🚀 Serveur démarré sur le port ${PORT}`);
-  console.log(`📡 API disponible sur http://localhost:${PORT}`);
-});
+app.listen(PORT, () => {});

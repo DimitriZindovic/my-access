@@ -13,21 +13,43 @@ const allowedOrigins = process.env.FRONTEND_URL
   ? process.env.FRONTEND_URL.split(",").map((url) => url.trim())
   : ["http://localhost:3000"];
 
+console.log("🌐 CORS allowed origins:", allowedOrigins);
+
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) {
+        console.log("⚠️ Request without origin (allowed)");
         return callback(null, true);
       }
-      if (allowedOrigins.includes(origin)) {
+
+      const originWithoutTrailingSlash = origin.replace(/\/$/, "");
+      const isAllowed = allowedOrigins.some(
+        (allowed) =>
+          allowed === origin ||
+          allowed === originWithoutTrailingSlash ||
+          origin.startsWith(allowed)
+      );
+
+      if (isAllowed) {
+        console.log(`✅ CORS allowed for origin: ${origin}`);
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        console.log(`❌ CORS blocked for origin: ${origin}`);
+        console.log(`   Allowed origins: ${allowedOrigins.join(", ")}`);
+        callback(
+          new Error(
+            `Not allowed by CORS. Origin: ${origin}. Allowed: ${allowedOrigins.join(
+              ", "
+            )}`
+          )
+        );
       }
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Content-Type"],
   })
 );
 app.use(express.json());
@@ -100,6 +122,16 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error("Erreur serveur:", err);
+
+  if (err.message && err.message.includes("CORS")) {
+    return res.status(403).json({
+      error: "CORS Error",
+      message: err.message,
+      allowedOrigins: allowedOrigins,
+      requestOrigin: req.headers.origin,
+    });
+  }
+
   res.status(500).json({
     error: "Erreur serveur interne",
     message: err.message,

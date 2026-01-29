@@ -46,9 +46,11 @@ app.use(
   }
 );
 
-app.listen(PORT, () => {
-  console.log(`🚀 Serveur démarré sur le port ${PORT}`);
-  console.log(`📡 API disponible sur http://localhost:${PORT}/api`);
+const HOST = "0.0.0.0";
+
+app.listen(Number(PORT), HOST, () => {
+  console.log(`🚀 Serveur démarré sur ${HOST}:${PORT}`);
+  console.log(`📡 API disponible sur http://${HOST}:${PORT}/api`);
 });
 
 export default app;

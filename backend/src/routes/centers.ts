@@ -83,7 +83,7 @@ router.get("/", optionalAuthMiddleware, async (req: Request, res: Response): Pro
 // GET /api/centers/:id - Détail d'un centre
 router.get("/:id", optionalAuthMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const center = await prisma.center.findUnique({
       where: { id: BigInt(id) },
@@ -138,7 +138,7 @@ router.get("/:id", optionalAuthMiddleware, async (req: Request, res: Response): 
 // POST /api/centers/:id/reviews - Ajouter un avis
 router.post("/:id/reviews", authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { rating, comment } = req.body;
 
     if (!rating || rating < 1 || rating > 5) {
@@ -146,9 +146,11 @@ router.post("/:id/reviews", authMiddleware, async (req: AuthRequest, res: Respon
       return;
     }
 
+    const centerId = BigInt(id);
+
     const review = await prisma.review.create({
       data: {
-        centerId: BigInt(id),
+        centerId,
         userId: req.user!.id,
         rating,
         comment,
@@ -157,14 +159,14 @@ router.post("/:id/reviews", authMiddleware, async (req: AuthRequest, res: Respon
 
     // Mettre à jour la note moyenne du centre
     const reviews = await prisma.review.findMany({
-      where: { centerId: BigInt(id) },
+      where: { centerId },
     });
 
     const avgRating =
       reviews.reduce((sum: number, r: Review) => sum + r.rating, 0) / reviews.length;
 
     await prisma.center.update({
-      where: { id: BigInt(id) },
+      where: { id: centerId },
       data: { avgRating },
     });
 

@@ -13,7 +13,7 @@ export default function LegalPage() {
                 <CardTitle>Éditeur du site</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <p><strong>Nom :</strong> AccessiSanté SAS</p>
+                <p><strong>Nom :</strong> MyAccess SAS</p>
                 <p><strong>Adresse :</strong> 123 Avenue de la République, 75011 Paris</p>
                 <p><strong>SIRET :</strong> 123 456 789 00012</p>
                 <p><strong>Email :</strong> contact@accessisante.fr</p>

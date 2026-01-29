@@ -1,5 +1,7 @@
 "use client"
 
+import Image from "next/image";
+
 interface FooterProps {
 }
 
@@ -9,7 +11,16 @@ export function Footer({  }: FooterProps) {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="mb-4">AccessiSanté</h3>
+            <div className="flex items-center">
+            <Image
+              src={"/logo.png"}
+              alt='Logo MyAccess'
+              width={512}
+              height={512}
+              className="w-20"
+            />
+            <h3 className="text-xl">MyAccess</h3>
+            </div>
             <p className="text-muted-foreground text-sm">
               Trouvez des centres de santé accessibles adaptés à vos besoins.
             </p>
@@ -107,7 +118,7 @@ export function Footer({  }: FooterProps) {
         </div>
 
         <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>© 2025 MyAccess. Tous droits réservés.</p>
+          <p>© {new Date(Date.now()).getFullYear()} MyAccess. Tous droits réservés.</p>
           <p className="mt-2">
             Plateforme dédiée à l'accessibilité des centres de santé pour tous.
           </p>

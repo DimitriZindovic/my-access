@@ -1,7 +1,13 @@
+"use client"
+
 import { useEffect, useRef } from 'react';
 import { MapPin } from 'lucide-react';
 import { Center } from '@/types';
 import { Badge } from '@/components/ui/badge';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 interface MapViewProps {
   centers: Center[];
@@ -28,9 +34,54 @@ export function MapView({ centers, selectedCenter, onSelectCenter }: MapViewProp
   };
 
   return (
-    <div className="h-full bg-muted/20 rounded-lg border relative overflow-hidden">
+    <div className="h-full bg-muted/20 rounded-lg border relative overflow-hidden z-48">
+      <MapContainer center={[48.8566, 2.3522]} zoom={12} className="h-full w-full">
+        <TileLayer
+          attribution='&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
+        /> 
+
+        {/* Center Markers */}
+        {centers.map((center, index) => {
+          // Position relative to Paris (simplified positioning)
+          const offsetX = (center.longitude - 2.3522) * 2000;
+          const offsetY = -(center.latitude - 48.8566) * 2000;
+
+          const iconHTML = new L.DivIcon({
+            className: `w-8! h-8! rounded-full ${getScoreColor(center.globalScore)} 
+                        flex! items-center justify-center text-white shadow-lg 
+                        ${selectedCenter?.id === center.id ? 'ring-4 ring-primary' : ''}`, // Classe CSS pour le style global
+            html: `<div aria-label="${center.name}, score ${center.globalScore}/5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-icon lucide-map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+            
+            
+          });
+          
+          return (
+            <Marker key={center.id} position={[center.latitude, center.longitude]} icon={iconHTML}>
+                <Popup>
+                  {/* Tooltip on hover */}
+                  <p className="text-sm mb-1!">{center.name}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge variant={getScoreBadgeVariant(center.globalScore)} className="text-xs">
+                      {center.globalScore}/5
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">{center.city}</span>
+                  </div>
+                  <Link
+                    href={"center/" + center.id}
+                    className='w-full text-center'
+                  >Voir les détails</Link>
+                </Popup>
+            </Marker>
+          );
+        })}
+
+      </MapContainer>
+
       {/* Map Header */}
-      <div className="absolute top-4 left-4 z-10 bg-white rounded-lg shadow-lg p-3">
+      <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3 z-1000">
         <div className="flex items-center gap-2 text-sm mb-2">
           <MapPin className="h-4 w-4" />
           <span>Paris et environs</span>
@@ -49,67 +100,6 @@ export function MapView({ centers, selectedCenter, onSelectCenter }: MapViewProp
             <span>Moyen</span>
           </div>
         </div>
-      </div>
-
-      {/* Simulated Map with Markers */}
-      <div 
-        ref={mapRef}
-        className="w-full h-full relative bg-gradient-to-br from-blue-50 to-green-50"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px'
-        }}
-      >
-        {/* Paris center reference */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-blue-600 rounded-full" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xs text-blue-600 mt-3">
-          Paris
-        </div>
-
-        {/* Center Markers */}
-        {centers.map((center, index) => {
-          // Position relative to Paris (simplified positioning)
-          const offsetX = (center.longitude - 2.3522) * 2000;
-          const offsetY = -(center.latitude - 48.8566) * 2000;
-          
-          return (
-            <button
-              key={center.id}
-              onClick={() => onSelectCenter(center)}
-              className={`absolute group transition-transform hover:scale-110 ${
-                selectedCenter?.id === center.id ? 'z-20 scale-110' : 'z-10'
-              }`}
-              style={{
-                left: `calc(50% + ${offsetX}px)`,
-                top: `calc(50% + ${offsetY}px)`,
-                transform: 'translate(-50%, -50%)'
-              }}
-            >
-              <div className={`w-8 h-8 rounded-full ${getScoreColor(center.globalScore)} 
-                flex items-center justify-center text-white shadow-lg 
-                ${selectedCenter?.id === center.id ? 'ring-4 ring-primary' : ''}`}>
-                <MapPin className="h-5 w-5" fill="currentColor" />
-              </div>
-              
-              {/* Tooltip on hover */}
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 
-                opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                <div className="bg-white rounded-lg shadow-xl p-3 min-w-[200px] whitespace-nowrap">
-                  <p className="text-sm mb-1">{center.name}</p>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={getScoreBadgeVariant(center.globalScore)} className="text-xs">
-                      {center.globalScore}/5
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">{center.city}</span>
-                  </div>
-                </div>
-              </div>
-            </button>
-          );
-        })}
       </div>
 
       {/* Selected Center Info */}

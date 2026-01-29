@@ -14,6 +14,7 @@ import { Center, User as UserType } from '@/types';
 import { useEffect, useState } from 'react';
 import { getCenter, getCurrentUser, getNotifications, setCurrentUser } from '@/lib/mockData';
 import Link from 'next/link';
+import Image from 'next/image';
 
 type Page = 
   | 'home' 
@@ -103,7 +104,13 @@ export function Header({ }: HeaderProps) {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href={"/"} className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-primary-foreground">
+              <Image
+                src={"/logo.png"}
+                alt='Logo MyAccess'
+                width={512}
+                height={512}
+              />
               <span className="sr-only">Logo</span>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" opacity="0.7"/>
@@ -123,14 +130,14 @@ export function Header({ }: HeaderProps) {
                 onClick={() => window.location.href =('/dashboard')}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
-                Recherche
+                Centres
               </button>
-              <button 
+              {/*<button 
                 onClick={() => window.location.href =('/appointments')}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 Mes rendez-vous
-              </button>
+              </button>*/}
               <button 
                 onClick={() => window.location.href =('/help')}
                 className="text-muted-foreground hover:text-foreground transition-colors"
@@ -148,6 +155,7 @@ export function Header({ }: HeaderProps) {
                 variant="ghost"
                 size="icon"
                 className="relative"
+                aria-label='Notifications'
                 onClick={() => window.location.href =('/notifications')}
               >
                 <Bell className="h-5 w-5" />
@@ -163,7 +171,7 @@ export function Header({ }: HeaderProps) {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" aria-label='Paramètres utilisateurs'>
                     <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -173,14 +181,14 @@ export function Header({ }: HeaderProps) {
                     <p className="text-xs text-muted-foreground">{user.email}</p>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => window.location.href =('profile')}>
+                  <DropdownMenuItem onClick={() => window.location.href =('/profile')}>
                     <User className="mr-2 h-4 w-4" />
                     Mon profil
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => window.location.href =('appointments')}>
+                  {/*<DropdownMenuItem onClick={() => window.location.href =('/appointments')}>
                     Mes rendez-vous
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => window.location.href =('my-reviews')}>
+                  </DropdownMenuItem>*/}
+                  <DropdownMenuItem onClick={() => window.location.href =('/my-reviews')}>
                     Mes avis
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />

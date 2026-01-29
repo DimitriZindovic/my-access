@@ -37,7 +37,7 @@ export default function ContactPage() {
 
               <div>
                 <h3 className="mb-2">Adresse postale</h3>
-                <p>AccessiSanté SAS</p>
+                <p>MyAccess SAS</p>
                 <p>123 Avenue de la République</p>
                 <p>75011 Paris</p>
                 <p>France</p>

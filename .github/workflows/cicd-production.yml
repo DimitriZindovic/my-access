@@ -22,8 +22,16 @@ jobs:
             echo "Error: backend/package.json not found"
             exit 1
           fi
-          if [ ! -f "backend/server.js" ]; then
-            echo "Error: backend/server.js not found"
+          if [ ! -f "backend/src/server.ts" ]; then
+            echo "Error: backend/src/server.ts not found"
+            exit 1
+          fi
+          if [ ! -f "backend/prisma/schema.prisma" ]; then
+            echo "Error: backend/prisma/schema.prisma not found"
+            exit 1
+          fi
+          if [ ! -f "backend/tsconfig.json" ]; then
+            echo "Error: backend/tsconfig.json not found"
             exit 1
           fi
           echo "Backend structure verified ✓"

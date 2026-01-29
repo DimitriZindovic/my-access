@@ -21,7 +21,7 @@ interface DashboardProps {
   onNavigate: (page: string, centerId?: string) => void;
 }
 
-export default function Dashboard({ user, onNavigate }: DashboardProps) {
+export default function DashboardClient({ user, onNavigate }: DashboardProps) {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState( searchParams.get("q") ?? '');
   const [selectedHandicaps, setSelectedHandicaps] = useState<HandicapType[]>(user?.handicapTypes || []);

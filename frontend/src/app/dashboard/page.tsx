@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FilterPanel } from './_components/FilterPanel';
 import { CenterCard } from './_components/CenterCard';
 import dynamic from 'next/dynamic';
+import { useSearchParams } from 'next/navigation';
 
 const MapView = dynamic(() => import('./_components/MapView').then((mod) => mod.MapView), { 
   ssr: false,
@@ -21,7 +22,8 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ user, onNavigate }: DashboardProps) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const searchParams = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState( searchParams.get("q") ?? '');
   const [selectedHandicaps, setSelectedHandicaps] = useState<HandicapType[]>(user?.handicapTypes || []);
   const [minScore, setMinScore] = useState(0);
   const [centerType, setCenterType] = useState<'all' | 'vaccination' | 'depistage' | 'both'>('all');

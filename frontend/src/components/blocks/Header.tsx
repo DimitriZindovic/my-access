@@ -103,7 +103,7 @@ export function Header({ }: HeaderProps) {
       </a>
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <Link href={"/"} className="flex items-center gap-2">
+          <Link href={"/"} className="flex items-center gap-2" aria-label="Retour à l'acceuil">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center text-primary-foreground">
               <Image
                 src={"/logo.png"}

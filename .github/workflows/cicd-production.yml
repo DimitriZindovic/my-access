@@ -16,6 +16,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Verify backend structure
+        run: |
+          if [ ! -f "backend/package.json" ]; then
+            echo "Error: backend/package.json not found"
+            exit 1
+          fi
+          if [ ! -f "backend/src/server.ts" ]; then
+            echo "Error: backend/src/server.ts not found"
+            exit 1
+          fi
+          if [ ! -f "backend/prisma/schema.prisma" ]; then
+            echo "Error: backend/prisma/schema.prisma not found"
+            exit 1
+          fi
+          if [ ! -f "backend/tsconfig.json" ]; then
+            echo "Error: backend/tsconfig.json not found"
+            exit 1
+          fi
+          echo "Backend structure verified ✓"
+
       - name: Trigger Render Deploy (Backend)
         run: |
           curl -X POST "https://api.render.com/deploy/srv/${{ secrets.RENDER_BACKEND_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}" \

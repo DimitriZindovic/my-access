@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: my-access-backend
+    runtime: node
+    buildCommand: yarn
+    startCommand: npm install && npm run prisma:generate && npm run build && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_DIRECT_URL
+        sync: false

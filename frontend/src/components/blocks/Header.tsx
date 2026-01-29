@@ -15,6 +15,12 @@ import { getNotifications } from "@/lib/mockData";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+} from '@/components/ui/dropdown-menu';
+import { Center, User as UserType } from '@/types';
+import { useEffect, useState } from 'react';
+import { getCenter, getCurrentUser, getNotifications, setCurrentUser } from '@/lib/mockData';
+import Link from 'next/link';
+import Image from 'next/image';
 
 export function Header() {
   const router = useRouter();
@@ -53,6 +59,14 @@ export function Header() {
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-primary-foreground">
+          <Link href={"/"} className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-primary-foreground">
+              <Image
+                src={"/logo.png"}
+                alt='Logo MyAccess'
+                width={512}
+                height={512}
+              />
               <span className="sr-only">Logo</span>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path
@@ -92,12 +106,19 @@ export function Header() {
               </Link>
               <Link
                 href="/appointments"
+                Centres
+              </button>
+              {/*<button 
+                onClick={() => window.location.href =('/appointments')}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 Mes rendez-vous
               </Link>
               <Link
                 href="/help"
+              </button>*/}
+              <button 
+                onClick={() => window.location.href =('/help')}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 Aide
@@ -117,6 +138,8 @@ export function Header() {
                 className="relative"
                 onClick={() => router.push("/notifications")}
                 aria-label={`Notifications${unreadNotifications > 0 ? `, ${unreadNotifications} non lues` : ""}`}
+                aria-label='Notifications'
+                onClick={() => window.location.href =('/notifications')}
               >
                 <Bell className="h-5 w-5" aria-hidden="true" />
                 {unreadNotifications > 0 && (
@@ -133,6 +156,8 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" aria-label="Menu utilisateur">
                     <User className="h-5 w-5" aria-hidden="true" />
+                  <Button variant="ghost" size="icon" aria-label='Paramètres utilisateurs'>
+                    <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -143,12 +168,17 @@ export function Header() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => router.push("/profile")}>
                     <User className="mr-2 h-4 w-4" aria-hidden="true" />
+                  <DropdownMenuItem onClick={() => window.location.href =('/profile')}>
+                    <User className="mr-2 h-4 w-4" />
                     Mon profil
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => router.push("/appointments")}>
+                  {/*<DropdownMenuItem onClick={() => window.location.href =('/appointments')}>
                     Mes rendez-vous
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => router.push("/my-reviews")}>
+                  </DropdownMenuItem>*/}
+                  <DropdownMenuItem onClick={() => window.location.href =('/my-reviews')}>
                     Mes avis
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />

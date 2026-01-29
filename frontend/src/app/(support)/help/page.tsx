@@ -16,7 +16,7 @@ export default function HelpPage() {
             <HelpCircle className="h-12 w-12 mx-auto mb-4 text-primary" />
             <h1 className="mb-4">Centre d'aide</h1>
             <p className="text-muted-foreground">
-              Trouvez des réponses à vos questions sur l'utilisation d'AccessiSanté
+              Trouvez des réponses à vos questions sur l'utilisation d'MyAccess
             </p>
           </div>
 

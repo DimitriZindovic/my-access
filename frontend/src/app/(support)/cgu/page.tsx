@@ -16,7 +16,7 @@ export default function CGUPage() {
                 <p>
                   Les présentes conditions générales d'utilisation (CGU) ont pour objet de définir 
                   les modalités et conditions dans lesquelles les utilisateurs peuvent accéder et 
-                  utiliser la plateforme AccessiSanté.
+                  utiliser la plateforme MyAccess.
                 </p>
               </CardContent>
             </Card>
@@ -27,7 +27,7 @@ export default function CGUPage() {
               </CardHeader>
               <CardContent>
                 <p>
-                  L'accès à AccessiSanté est gratuit. Certaines fonctionnalités nécessitent la 
+                  L'accès à MyAccess est gratuit. Certaines fonctionnalités nécessitent la 
                   création d'un compte utilisateur.
                 </p>
               </CardContent>
@@ -66,7 +66,7 @@ export default function CGUPage() {
               </CardHeader>
               <CardContent>
                 <p>
-                  Tous les contenus présents sur AccessiSanté (textes, images, logos, etc.) sont 
+                  Tous les contenus présents sur MyAccess (textes, images, logos, etc.) sont 
                   protégés par le droit d'auteur. Toute reproduction non autorisée est interdite.
                 </p>
               </CardContent>
@@ -78,7 +78,7 @@ export default function CGUPage() {
               </CardHeader>
               <CardContent>
                 <p>
-                  AccessiSanté ne peut être tenu responsable des informations fournies par les 
+                  MyAccess ne peut être tenu responsable des informations fournies par les 
                   centres de santé ou des avis publiés par les utilisateurs. Nous vous recommandons 
                   de vérifier les informations directement auprès des établissements.
                 </p>

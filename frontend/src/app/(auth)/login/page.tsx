@@ -68,7 +68,7 @@ export default function LoginPage() {
         <CardHeader>
           <CardTitle>Connexion</CardTitle>
           <CardDescription>
-            Connectez-vous à votre compte AccessiSanté
+            Connectez-vous à votre compte MyAccess
           </CardDescription>
         </CardHeader>
         <CardContent>

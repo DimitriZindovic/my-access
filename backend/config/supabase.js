@@ -11,8 +11,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error("Missing Supabase environment variables");
 }
 
-// Client pour les opérations côté serveur avec les privilèges admin
-// Utilisé pour l'authentification et les opérations admin
 export const supabaseAdmin = createClient(
   supabaseUrl,
   supabaseServiceKey || supabaseAnonKey,
@@ -24,10 +22,8 @@ export const supabaseAdmin = createClient(
   }
 );
 
-// Client pour les opérations utilisateur standard
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Export de la configuration pour référence
 export const supabaseConfig = {
   url: supabaseUrl,
   anonKey: supabaseAnonKey,

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/supabase.js";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -12,11 +12,12 @@ export async function authMiddleware(
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) {
+): Promise<void> {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Token manquant ou invalide" });
+    res.status(401).json({ error: "Token manquant ou invalide" });
+    return;
   }
 
   const token = authHeader.split(" ")[1];
@@ -28,7 +29,8 @@ export async function authMiddleware(
     } = await supabase.auth.getUser(token);
 
     if (error || !user) {
-      return res.status(401).json({ error: "Token invalide ou expiré" });
+      res.status(401).json({ error: "Token invalide ou expiré" });
+      return;
     }
 
     req.user = {
@@ -39,7 +41,7 @@ export async function authMiddleware(
     next();
   } catch (error) {
     console.error("Erreur d'authentification:", error);
-    return res.status(500).json({ error: "Erreur d'authentification" });
+    res.status(500).json({ error: "Erreur d'authentification" });
   }
 }
 
@@ -48,11 +50,12 @@ export async function optionalAuthMiddleware(
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) {
+): Promise<void> {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return next();
+    next();
+    return;
   }
 
   const token = authHeader.split(" ")[1];

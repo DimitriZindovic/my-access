@@ -1,17 +1,18 @@
 import { Router, Request, Response } from "express";
-import { supabaseAdmin, supabase } from "../lib/supabase";
-import prisma from "../lib/prisma";
-import { authMiddleware, AuthRequest } from "../middleware/auth";
+import { supabaseAdmin, supabase } from "../lib/supabase.js";
+import prisma from "../lib/prisma.js";
+import { authMiddleware, AuthRequest } from "../middleware/auth.js";
 
 const router = Router();
 
 // POST /api/auth/signup - Inscription
-router.post("/signup", async (req: Request, res: Response) => {
+router.post("/signup", async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, firstName, lastName, handicapType } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: "Email et mot de passe requis" });
+      res.status(400).json({ error: "Email et mot de passe requis" });
+      return;
     }
 
     // Créer l'utilisateur dans Supabase Auth
@@ -25,9 +26,11 @@ router.post("/signup", async (req: Request, res: Response) => {
     if (authError) {
       console.error("Erreur Supabase Auth:", authError);
       if (authError.message.includes("already registered")) {
-        return res.status(400).json({ error: "Cet email est déjà utilisé" });
+        res.status(400).json({ error: "Cet email est déjà utilisé" });
+        return;
       }
-      return res.status(400).json({ error: authError.message });
+      res.status(400).json({ error: authError.message });
+      return;
     }
 
     // Créer le profil utilisateur dans la DB
@@ -49,7 +52,7 @@ router.post("/signup", async (req: Request, res: Response) => {
       });
 
     if (signInError) {
-      return res.status(201).json({
+      res.status(201).json({
         message: "Compte créé avec succès. Veuillez vous connecter.",
         user: {
           id: user.id,
@@ -59,9 +62,10 @@ router.post("/signup", async (req: Request, res: Response) => {
           handicapType: user.handicapType,
         },
       });
+      return;
     }
 
-    return res.status(201).json({
+    res.status(201).json({
       message: "Compte créé avec succès",
       user: {
         id: user.id,
@@ -78,17 +82,18 @@ router.post("/signup", async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Erreur inscription:", error);
-    return res.status(500).json({ error: "Erreur lors de l'inscription" });
+    res.status(500).json({ error: "Erreur lors de l'inscription" });
   }
 });
 
 // POST /api/auth/login - Connexion
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/login", async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: "Email et mot de passe requis" });
+      res.status(400).json({ error: "Email et mot de passe requis" });
+      return;
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -98,7 +103,8 @@ router.post("/login", async (req: Request, res: Response) => {
 
     if (error) {
       console.error("Erreur de connexion:", error);
-      return res.status(401).json({ error: "Email ou mot de passe incorrect" });
+      res.status(401).json({ error: "Email ou mot de passe incorrect" });
+      return;
     }
 
     // Récupérer le profil utilisateur depuis la DB
@@ -116,7 +122,7 @@ router.post("/login", async (req: Request, res: Response) => {
       });
     }
 
-    return res.json({
+    res.json({
       user: {
         id: user.id,
         email: user.email,
@@ -132,39 +138,34 @@ router.post("/login", async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Erreur connexion:", error);
-    return res.status(500).json({ error: "Erreur lors de la connexion" });
+    res.status(500).json({ error: "Erreur lors de la connexion" });
   }
 });
 
 // POST /api/auth/logout - Déconnexion
-router.post("/logout", authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post("/logout", authMiddleware, async (_req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader?.split(" ")[1];
-
-    if (token) {
-      await supabase.auth.signOut();
-    }
-
-    return res.json({ message: "Déconnexion réussie" });
+    await supabase.auth.signOut();
+    res.json({ message: "Déconnexion réussie" });
   } catch (error) {
     console.error("Erreur déconnexion:", error);
-    return res.status(500).json({ error: "Erreur lors de la déconnexion" });
+    res.status(500).json({ error: "Erreur lors de la déconnexion" });
   }
 });
 
 // GET /api/auth/me - Obtenir l'utilisateur courant
-router.get("/me", authMiddleware, async (req: AuthRequest, res: Response) => {
+router.get("/me", authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user!.id },
     });
 
     if (!user) {
-      return res.status(404).json({ error: "Utilisateur non trouvé" });
+      res.status(404).json({ error: "Utilisateur non trouvé" });
+      return;
     }
 
-    return res.json({
+    res.json({
       id: user.id,
       email: user.email,
       firstName: user.firstName,
@@ -174,12 +175,12 @@ router.get("/me", authMiddleware, async (req: AuthRequest, res: Response) => {
     });
   } catch (error) {
     console.error("Erreur récupération profil:", error);
-    return res.status(500).json({ error: "Erreur lors de la récupération du profil" });
+    res.status(500).json({ error: "Erreur lors de la récupération du profil" });
   }
 });
 
 // PUT /api/auth/me - Mettre à jour le profil
-router.put("/me", authMiddleware, async (req: AuthRequest, res: Response) => {
+router.put("/me", authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { firstName, lastName, handicapType, phone } = req.body;
 
@@ -193,7 +194,7 @@ router.put("/me", authMiddleware, async (req: AuthRequest, res: Response) => {
       },
     });
 
-    return res.json({
+    res.json({
       id: user.id,
       email: user.email,
       firstName: user.firstName,
@@ -203,17 +204,18 @@ router.put("/me", authMiddleware, async (req: AuthRequest, res: Response) => {
     });
   } catch (error) {
     console.error("Erreur mise à jour profil:", error);
-    return res.status(500).json({ error: "Erreur lors de la mise à jour du profil" });
+    res.status(500).json({ error: "Erreur lors de la mise à jour du profil" });
   }
 });
 
 // POST /api/auth/refresh - Rafraîchir le token
-router.post("/refresh", async (req: Request, res: Response) => {
+router.post("/refresh", async (req: Request, res: Response): Promise<void> => {
   try {
     const { refreshToken } = req.body;
 
     if (!refreshToken) {
-      return res.status(400).json({ error: "Refresh token requis" });
+      res.status(400).json({ error: "Refresh token requis" });
+      return;
     }
 
     const { data, error } = await supabase.auth.refreshSession({
@@ -221,17 +223,18 @@ router.post("/refresh", async (req: Request, res: Response) => {
     });
 
     if (error) {
-      return res.status(401).json({ error: "Token invalide ou expiré" });
+      res.status(401).json({ error: "Token invalide ou expiré" });
+      return;
     }
 
-    return res.json({
+    res.json({
       accessToken: data.session?.access_token,
       refreshToken: data.session?.refresh_token,
       expiresAt: data.session?.expires_at,
     });
   } catch (error) {
     console.error("Erreur rafraîchissement token:", error);
-    return res.status(500).json({ error: "Erreur lors du rafraîchissement du token" });
+    res.status(500).json({ error: "Erreur lors du rafraîchissement du token" });
   }
 });
 

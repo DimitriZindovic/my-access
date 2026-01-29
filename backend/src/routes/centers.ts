@@ -1,15 +1,24 @@
 import { Router, Request, Response } from "express";
-import prisma from "../lib/prisma";
-import { authMiddleware, optionalAuthMiddleware, AuthRequest } from "../middleware/auth";
+import prisma from "../lib/prisma.js";
+import { authMiddleware, optionalAuthMiddleware, AuthRequest } from "../middleware/auth.js";
+import { Center, Review, AccessibilitySpec, User } from "@prisma/client";
 
 const router = Router();
 
+type CenterWithRelations = Center & {
+  accessibilitySpecs: AccessibilitySpec | null;
+  reviews: (Review & { user: Pick<User, "firstName" | "lastName"> })[];
+};
+
 // GET /api/centers - Liste des centres
-router.get("/", optionalAuthMiddleware, async (req: Request, res: Response) => {
+router.get("/", optionalAuthMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
     const { search, verified, limit = "50", offset = "0" } = req.query;
 
-    const where: any = {};
+    const where: {
+      OR?: { name?: { contains: string; mode: "insensitive" }; address?: { contains: string; mode: "insensitive" } }[];
+      verifiedAccess?: boolean;
+    } = {};
 
     if (search) {
       where.OR = [
@@ -45,7 +54,7 @@ router.get("/", optionalAuthMiddleware, async (req: Request, res: Response) => {
     });
 
     // Convertir BigInt en string pour JSON
-    const serializedCenters = centers.map((center) => ({
+    const serializedCenters = centers.map((center: CenterWithRelations) => ({
       ...center,
       id: center.id.toString(),
       latitude: center.latitude.toString(),
@@ -64,15 +73,15 @@ router.get("/", optionalAuthMiddleware, async (req: Request, res: Response) => {
       })),
     }));
 
-    return res.json(serializedCenters);
+    res.json(serializedCenters);
   } catch (error) {
     console.error("Erreur récupération centres:", error);
-    return res.status(500).json({ error: "Erreur lors de la récupération des centres" });
+    res.status(500).json({ error: "Erreur lors de la récupération des centres" });
   }
 });
 
 // GET /api/centers/:id - Détail d'un centre
-router.get("/:id", optionalAuthMiddleware, async (req: Request, res: Response) => {
+router.get("/:id", optionalAuthMiddleware, async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -95,7 +104,8 @@ router.get("/:id", optionalAuthMiddleware, async (req: Request, res: Response) =
     });
 
     if (!center) {
-      return res.status(404).json({ error: "Centre non trouvé" });
+      res.status(404).json({ error: "Centre non trouvé" });
+      return;
     }
 
     // Convertir BigInt en string pour JSON
@@ -118,21 +128,22 @@ router.get("/:id", optionalAuthMiddleware, async (req: Request, res: Response) =
       })),
     };
 
-    return res.json(serializedCenter);
+    res.json(serializedCenter);
   } catch (error) {
     console.error("Erreur récupération centre:", error);
-    return res.status(500).json({ error: "Erreur lors de la récupération du centre" });
+    res.status(500).json({ error: "Erreur lors de la récupération du centre" });
   }
 });
 
 // POST /api/centers/:id/reviews - Ajouter un avis
-router.post("/:id/reviews", authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post("/:id/reviews", authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { rating, comment } = req.body;
 
     if (!rating || rating < 1 || rating > 5) {
-      return res.status(400).json({ error: "Note invalide (1-5)" });
+      res.status(400).json({ error: "Note invalide (1-5)" });
+      return;
     }
 
     const review = await prisma.review.create({
@@ -150,21 +161,21 @@ router.post("/:id/reviews", authMiddleware, async (req: AuthRequest, res: Respon
     });
 
     const avgRating =
-      reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+      reviews.reduce((sum: number, r: Review) => sum + r.rating, 0) / reviews.length;
 
     await prisma.center.update({
       where: { id: BigInt(id) },
       data: { avgRating },
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       ...review,
       id: review.id.toString(),
       centerId: review.centerId.toString(),
     });
   } catch (error) {
     console.error("Erreur ajout avis:", error);
-    return res.status(500).json({ error: "Erreur lors de l'ajout de l'avis" });
+    res.status(500).json({ error: "Erreur lors de l'ajout de l'avis" });
   }
 });
 

@@ -1,8 +1,8 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import authRoutes from "./routes/auth";
-import centersRoutes from "./routes/centers";
+import authRoutes from "./routes/auth.js";
+import centersRoutes from "./routes/centers.js";
 
 // Charger les variables d'environnement
 dotenv.config();
@@ -20,7 +20,7 @@ app.use(
 app.use(express.json());
 
 // Health check pour Render
-app.get("/health", (req, res) => {
+app.get("/health", (_req: Request, res: Response) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
@@ -29,7 +29,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/centers", centersRoutes);
 
 // Route 404
-app.use((req, res) => {
+app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Route non trouvée" });
 });
 
@@ -37,9 +37,9 @@ app.use((req, res) => {
 app.use(
   (
     err: Error,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
+    _req: Request,
+    res: Response,
+    _next: NextFunction
   ) => {
     console.error("Erreur serveur:", err);
     res.status(500).json({ error: "Erreur interne du serveur" });

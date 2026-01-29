@@ -1,9 +1,16 @@
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import authRoutes from "./routes/auth.js";
+
+console.log("Starting server initialization...");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("PORT:", process.env.PORT);
 
 dotenv.config();
+
+console.log("Loading routes...");
+import authRoutes from "./routes/auth.js";
+console.log("Routes loaded successfully");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
@@ -45,15 +52,24 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 // Start server
-app
+console.log(`Attempting to start server on port ${PORT}...`);
+const server = app
   .listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`✅ Server running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+    console.log(`Server listening on 0.0.0.0:${PORT}`);
   })
   .on("error", (err: NodeJS.ErrnoException) => {
-    console.error("Failed to start server:", err);
+    console.error("❌ Failed to start server:", err);
+    console.error("Error code:", err.code);
+    console.error("Error message:", err.message);
     process.exit(1);
   });
+
+// Keep process alive
+server.on("listening", () => {
+  console.log("✅ Server is listening and ready to accept connections");
+});
 
 // Handle uncaught errors
 process.on("uncaughtException", (error) => {

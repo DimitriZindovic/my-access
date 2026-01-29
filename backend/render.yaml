@@ -3,7 +3,7 @@ services:
     name: my-access-backend
     env: node
     plan: starter
-    buildCommand: rm -rf node_modules package-lock.json && npm install && npm run build
+    buildCommand: rm -rf node_modules yarn.lock && npm install && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV

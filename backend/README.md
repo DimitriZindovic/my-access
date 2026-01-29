@@ -5,11 +5,13 @@ Backend Express.js API with TypeScript for the My Access application using Supab
 ## Setup
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Create a `.env` file based on `.env.example`:
+
 ```bash
 cp .env.example .env
 ```
@@ -25,23 +27,27 @@ Ce projet utilise Supabase de deux manières différentes :
 **`DATABASE_URL`** : Connection string PostgreSQL vers votre base Supabase
 
 Pour obtenir cette URL :
+
 1. Allez dans votre projet Supabase Dashboard
 2. Naviguez vers **Settings** > **Database**
 3. Sous **Connection string**, vous avez deux options :
 
    **Option 1 : Connection Pooling (Recommandé pour production)**
+
    - Sélectionnez **Connection pooling** > **Session mode** ou **Transaction mode**
    - Port : `6543` (pgbouncer)
    - Format : `postgresql://postgres.[PROJECT-REF]:[YOUR-PASSWORD]@aws-1-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true`
    - ✅ Recommandé pour les applications en production (meilleure gestion des connexions)
 
    **Option 2 : Connection Directe (Pour migrations Prisma)**
+
    - Sélectionnez **URI**
    - Port : `5432` (direct)
    - Format : `postgresql://postgres:[YOUR-PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres`
    - ⚠️ Utilisez cette option uniquement pour `prisma migrate` ou `prisma db push`
 
 **Important** :
+
 - Pour le développement et la production, utilisez **Connection pooling** (port 6543)
 - Pour les migrations Prisma, utilisez la **Connection directe** (port 5432) car Prisma a besoin d'un accès direct pour créer/modifier les schémas
 - Remplacez `[YOUR-PASSWORD]` par votre mot de passe de base de données Supabase
@@ -84,6 +90,7 @@ FRONTEND_URL=http://localhost:3000
 **Note** : Pour exécuter les migrations Prisma (`prisma migrate` ou `prisma db push`), vous devrez temporairement utiliser la connection directe (port 5432) car Prisma nécessite un accès direct à la base de données pour modifier le schéma.
 
 4. Generate Prisma Client:
+
 ```bash
 npm run prisma:generate
 ```
@@ -93,6 +100,7 @@ npm run prisma:generate
 **⚠️ Important** : Pour les migrations Prisma, vous devez utiliser la **connection directe** (port 5432) car Prisma nécessite un accès direct à la base de données.
 
 **Option A : Migration avec prisma migrate (recommandé pour production)**
+
 ```bash
 # Temporairement, changez DATABASE_URL dans .env pour utiliser le port 5432
 # DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
@@ -101,6 +109,7 @@ npm run prisma:migrate
 ```
 
 **Option B : Push du schéma (pour développement)**
+
 ```bash
 # Temporairement, changez DATABASE_URL dans .env pour utiliser le port 5432
 npm run prisma:push
@@ -108,6 +117,7 @@ npm run prisma:push
 ```
 
 **Astuce** : Vous pouvez créer deux fichiers `.env` :
+
 - `.env` : Connection pooling (port 6543) pour l'application
 - `.env.migrate` : Connection directe (port 5432) pour les migrations
   - Utilisez : `dotenv -e .env.migrate -- npm run prisma:migrate`
@@ -123,6 +133,7 @@ The database schema is defined in `prisma/schema.prisma`. The schema includes:
 - **bookings**: Appointment bookings
 
 To view and edit data:
+
 ```bash
 npm run prisma:studio
 ```
@@ -130,16 +141,19 @@ npm run prisma:studio
 ## Running the Server
 
 Development (with hot reload):
+
 ```bash
 npm run dev
 ```
 
 Build for production:
+
 ```bash
 npm run build
 ```
 
 Production:
+
 ```bash
 npm start
 ```
@@ -164,6 +178,7 @@ npm start
 ## Authentication
 
 All protected endpoints require an `Authorization` header:
+
 ```
 Authorization: Bearer <access_token>
 ```
@@ -177,6 +192,7 @@ The access token is returned in the `session` object after login/signup.
 Ce projet utilise deux connexions distinctes à Supabase :
 
 1. **Prisma ORM** → Connexion directe à PostgreSQL via `DATABASE_URL`
+
    - Gère toutes les opérations CRUD sur les tables
    - Pas besoin des API keys Supabase pour la base de données
    - Utilise la connection string PostgreSQL standard
@@ -200,3 +216,16 @@ Ce projet utilise deux connexions distinctes à Supabase :
 - **Supabase Auth**: Authentication service (via API keys)
 - **PostgreSQL**: Database (hébergée sur Supabase)
 - **express-validator**: Request validation
+
+## Configuration Render
+
+**Important** : Si Render utilise `yarn` au lieu de `npm` :
+
+1. Allez dans votre service Render > **Settings**
+2. Dans la section **Build & Deploy**, trouvez **Build Command**
+3. Assurez-vous que le **Build Command** est : `npm run build`
+4. Si Render détecte automatiquement yarn, vous pouvez forcer npm en :
+   - Supprimant tout fichier `yarn.lock` du repository
+   - Ou en configurant explicitement npm dans les paramètres Render
+
+Le script `build` dans `package.json` inclut automatiquement `prisma generate && tsc`, donc Prisma Client sera généré lors du build.

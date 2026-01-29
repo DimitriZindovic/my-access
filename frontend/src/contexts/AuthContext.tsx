@@ -117,6 +117,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (result.session) {
         setSession(result.session);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(result.session));
+      } else {
+        throw new Error("Session non créée. Veuillez vous connecter.");
       }
     },
     []

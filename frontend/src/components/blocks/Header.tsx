@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react';
 import { getCenter, getCurrentUser, getNotifications, setCurrentUser } from '@/lib/mockData';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '@/contexts/AuthContext';
 
 type Page = 
   | 'home' 
@@ -40,20 +41,20 @@ interface HeaderProps {
 }
 
 export function Header({ }: HeaderProps) {
-  const [user, setUser] = useState<UserType | null>(null);
+  const {user, logout} = useAuth()
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [selectedCenterId, setSelectedCenterId] = useState<string | null>(null);
   const [selectedCenter, setSelectedCenter] = useState<Center | null>(null);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   // Load user on mount
-    useEffect(() => {
+    /*useEffect(() => {
       const savedUser = getCurrentUser();
       if (savedUser) {
         setUser(savedUser);
         setCurrentPage('dashboard');
       }
-    }, []);
+    }, []);*/
   
     // Update unread notifications count
   useEffect(() => {
@@ -82,18 +83,16 @@ export function Header({ }: HeaderProps) {
     window.scrollTo(0, 0);
   };
 
-  const handleLogin = () => {
+  /*const handleLogin = () => {
     const savedUser = getCurrentUser();
     if (savedUser) {
       setUser(savedUser);
       setCurrentPage('dashboard');
     }
-  };
+  };*/
 
   const handleLogout = () => {
-    setCurrentUser(null);
-    setUser(null);
-    setCurrentPage('home');
+    logout()
   };
 
   return (
@@ -177,7 +176,7 @@ export function Header({ }: HeaderProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="px-2 py-1.5">
-                    <p className="text-sm">{user.name}</p>
+                    <p className="text-sm">{user.firstName} {user.lastName}</p>
                     <p className="text-xs text-muted-foreground">{user.email}</p>
                   </div>
                   <DropdownMenuSeparator />

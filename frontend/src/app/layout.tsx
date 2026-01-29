@@ -18,11 +18,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "MyAccess - Centres de santé accessibles",
   description: "Trouvez des centres de vaccination et dépistage accessibles près de chez vous",
-  title: "MyAccess",
-  description: "Accéssibilité de dingue",
-  icons : {
-    
-  }
 };
 
 export default function RootLayout({

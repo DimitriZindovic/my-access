@@ -33,11 +33,27 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/centers", centersRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok", message: "Backend is running" });
+});
+
+app.get("/api", (req, res) => {
+  res.json({
+    message: "API My Access",
+    endpoints: {
+      auth: "/api/auth",
+      centers: "/api/centers",
+      health: "/health",
+    },
+  });
 });
 
 app.get("/api/test-db", async (req, res) => {
@@ -75,11 +91,23 @@ app.get("/api/test-db", async (req, res) => {
 });
 
 app.use((req, res) => {
-  res.status(404).json({ error: "Route non trouvée" });
+  res.status(404).json({
+    error: "Route non trouvée",
+    path: req.path,
+    method: req.method,
+  });
 });
 
 app.use((err, req, res, next) => {
-  res.status(500).json({ error: "Erreur serveur interne" });
+  console.error("Erreur serveur:", err);
+  res.status(500).json({
+    error: "Erreur serveur interne",
+    message: err.message,
+  });
 });
 
-app.listen(PORT, () => {});
+app.listen(PORT, () => {
+  console.log(`🚀 Serveur démarré sur le port ${PORT}`);
+  console.log(`📡 API disponible sur http://localhost:${PORT}`);
+  console.log(`✅ Routes chargées: /api/auth, /api/centers`);
+});

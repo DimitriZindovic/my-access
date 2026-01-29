@@ -83,9 +83,22 @@ app.get("/api/test-db", async (req, res) => {
     const sql = (await import("./config/db.js")).default;
     const result =
       await sql`SELECT NOW() as current_time, version() as pg_version`;
+
+    const tableCheck = await sql`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'users'
+      ) as users_table_exists
+    `;
+
+    const usersCount = await sql`SELECT COUNT(*) as count FROM users`;
+
     res.json({
       status: "connected",
       database: "Supabase Postgres",
+      users_table_exists: tableCheck[0].users_table_exists,
+      users_count: parseInt(usersCount[0].count),
       ...result[0],
     });
   } catch (error) {

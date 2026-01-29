@@ -1,35 +1,20 @@
 {
-  "name": "my-access-backend",
+  "name": "backend",
   "version": "1.0.0",
-  "description": "Backend API for My Access application",
-  "main": "dist/server.js",
+  "description": "My access",
+  "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "prisma generate && tsc",
-    "start": "node dist/server.js",
-    "dev": "tsx watch src/server.ts",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio",
-    "prisma:push": "prisma db push",
-    "postinstall": "prisma generate",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "node --watch index.js"
   },
-  "keywords": ["express", "supabase", "prisma", "typescript", "api"],
-  "author": "",
+  "author": "My access",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^5.7.1",
     "@supabase/supabase-js": "^2.39.0",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/node": "^20.10.6",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "express-validator": "^7.0.1",
-    "prisma": "^5.7.1",
-    "tsx": "^4.7.0",
-    "typescript": "^5.3.3"
+    "express": "^5.2.1",
+    "postgres": "^3.4.8"
   }
 }

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.css";
 import { Header } from "../components/blocks/Header";
 import { Footer } from "../components/blocks/Footer";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,11 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MyAccess",
-  description: "Accéssibilité de dingue",
-  icons : {
-    
-  }
+  title: "MyAccess - Centres de santé accessibles",
+  description: "Trouvez des centres de vaccination et dépistage accessibles près de chez vous",
 };
 
 export default function RootLayout({
@@ -27,7 +25,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <html lang="fr">
       <head>
@@ -39,11 +36,11 @@ export default function RootLayout({
           crossOrigin=""></script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Header />
-        <main id="main-content">
-          {children}
-        </main>
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <main id="main-content">{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

@@ -1,231 +1,120 @@
-# My Access Backend API
+# Backend - My Access
 
-Backend Express.js API with TypeScript for the My Access application using Supabase for authentication and Prisma ORM for database operations.
+Backend Express.js avec authentification Supabase.
 
-## Setup
-
-1. Install dependencies:
+## Installation
 
 ```bash
 npm install
 ```
 
-2. Create a `.env` file based on `.env.example`:
+## Configuration
 
-```bash
-cp .env.example .env
-```
-
-3. Configure your environment variables in `.env`:
-
-### Connexion à Supabase
-
-Ce projet utilise Supabase de deux manières différentes :
-
-#### A. Base de données PostgreSQL (via Prisma ORM)
-
-**`DATABASE_URL`** : Connection string PostgreSQL vers votre base Supabase
-
-Pour obtenir cette URL :
-
-1. Allez dans votre projet Supabase Dashboard
-2. Naviguez vers **Settings** > **Database**
-3. Sous **Connection string**, vous avez deux options :
-
-   **Option 1 : Connection Pooling (Recommandé pour production)**
-
-   - Sélectionnez **Connection pooling** > **Session mode** ou **Transaction mode**
-   - Port : `6543` (pgbouncer)
-   - Format : `postgresql://postgres.[PROJECT-REF]:[YOUR-PASSWORD]@aws-1-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true`
-   - ✅ Recommandé pour les applications en production (meilleure gestion des connexions)
-
-   **Option 2 : Connection Directe (Pour migrations Prisma)**
-
-   - Sélectionnez **URI**
-   - Port : `5432` (direct)
-   - Format : `postgresql://postgres:[YOUR-PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres`
-   - ⚠️ Utilisez cette option uniquement pour `prisma migrate` ou `prisma db push`
-
-**Important** :
-
-- Pour le développement et la production, utilisez **Connection pooling** (port 6543)
-- Pour les migrations Prisma, utilisez la **Connection directe** (port 5432) car Prisma a besoin d'un accès direct pour créer/modifier les schémas
-- Remplacez `[YOUR-PASSWORD]` par votre mot de passe de base de données Supabase
-- Prisma se connecte directement à PostgreSQL, pas via les API keys Supabase
-
-#### B. Authentification (via Supabase Auth)
-
-Ces variables sont utilisées uniquement pour l'authentification des utilisateurs :
-
-- **`SUPABASE_URL`** : URL de votre projet Supabase (format: `https://xxxxx.supabase.co`)
-- **`SUPABASE_ANON_KEY`** : Clé publique anonyme (trouvable dans **Settings** > **API** > **Project API keys**)
-- **`SUPABASE_SERVICE_ROLE_KEY`** : Clé service role (trouvable dans **Settings** > **API** > **Project API keys** - ⚠️ gardez-la secrète)
-
-#### C. Configuration serveur
-
-- **`PORT`** : Port du serveur (default: 3001)
-- **`FRONTEND_URL`** : URL du frontend pour CORS (ex: `http://localhost:3000`)
-
-### Exemple de fichier `.env` :
+1. Créer un fichier `.env` à la racine du dossier `backend` :
 
 ```env
-# Database (Connection pooling - recommandé pour production)
-# Remplacez [YOUR-PASSWORD] par votre mot de passe Supabase
-DATABASE_URL=postgresql://postgres.bvcnxnbfdztaqwtnpspp:[YOUR-PASSWORD]@aws-1-eu-west-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+# Supabase Configuration
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
-# Pour les migrations Prisma, utilisez la connection directe (port 5432) :
-# DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.bvcnxnbfdztaqwtnpspp.supabase.co:5432/postgres
+# Database Connection String (Postgres direct connection)
+DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[project-ref].supabase.co:5432/postgres
 
-# Supabase Auth (pour l'authentification uniquement)
-SUPABASE_URL=https://bvcnxnbfdztaqwtnpspp.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
-# Server
+# Server Configuration
 PORT=3001
 NODE_ENV=development
+
+# Frontend URL (optionnel)
 FRONTEND_URL=http://localhost:3000
 ```
 
-**Note** : Pour exécuter les migrations Prisma (`prisma migrate` ou `prisma db push`), vous devrez temporairement utiliser la connection directe (port 5432) car Prisma nécessite un accès direct à la base de données pour modifier le schéma.
+2. Obtenir les clés Supabase :
+   - Allez sur https://supabase.com
+   - Créez un nouveau projet ou utilisez un projet existant
+   - Dans les paramètres du projet → API, vous trouverez :
+     - `SUPABASE_URL` : L'URL de votre projet
+     - `SUPABASE_ANON_KEY` : La clé anonyme (publique)
+     - `SUPABASE_SERVICE_ROLE_KEY` : La clé de service (secrète, à garder privée)
+   
+3. Obtenir la connection string de la base de données :
+   - Dans votre projet Supabase, allez dans **Settings** → **Database**
+   - Sous **Connection string**, sélectionnez :
+     - **Type** : Node.js
+     - **Source** : Primary Database
+     - **Method** : Direct connection (ou Session Pooler pour IPv4)
+   - Copiez la connection string et **remplacez `[YOUR-PASSWORD]` par votre mot de passe réel**
+   - Pour trouver/réinitialiser votre mot de passe : **Settings** → **Database** → **Database password**
+   
+   ⚠️ **Si vous avez une erreur "password authentication failed"**, consultez le fichier `SETUP_DB.md` pour un guide détaillé.
 
-4. Generate Prisma Client:
-
-```bash
-npm run prisma:generate
-```
-
-5. Run database migrations:
-
-**⚠️ Important** : Pour les migrations Prisma, vous devez utiliser la **connection directe** (port 5432) car Prisma nécessite un accès direct à la base de données.
-
-**Option A : Migration avec prisma migrate (recommandé pour production)**
-
-```bash
-# Temporairement, changez DATABASE_URL dans .env pour utiliser le port 5432
-# DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
-npm run prisma:migrate
-# Puis remettez la connection pooling (port 6543) pour l'application
-```
-
-**Option B : Push du schéma (pour développement)**
+## Démarrage
 
 ```bash
-# Temporairement, changez DATABASE_URL dans .env pour utiliser le port 5432
-npm run prisma:push
-# Puis remettez la connection pooling (port 6543) pour l'application
-```
-
-**Astuce** : Vous pouvez créer deux fichiers `.env` :
-
-- `.env` : Connection pooling (port 6543) pour l'application
-- `.env.migrate` : Connection directe (port 5432) pour les migrations
-  - Utilisez : `dotenv -e .env.migrate -- npm run prisma:migrate`
-
-## Database Schema
-
-The database schema is defined in `prisma/schema.prisma`. The schema includes:
-
-- **users**: User profiles linked to Supabase Auth
-- **centers**: Medical centers/healthcare facilities
-- **accessibility_specs**: Accessibility specifications for centers
-- **reviews**: User reviews of centers
-- **bookings**: Appointment bookings
-
-To view and edit data:
-
-```bash
-npm run prisma:studio
-```
-
-## Running the Server
-
-Development (with hot reload):
-
-```bash
+# Mode développement (avec watch)
 npm run dev
-```
 
-Build for production:
-
-```bash
-npm run build
-```
-
-Production:
-
-```bash
+# Mode production
 npm start
 ```
 
-## API Endpoints
+Le serveur démarre sur `http://localhost:3001` par défaut.
 
-### Authentication
+## Routes API
 
-- `POST /api/auth/signup` - Create a new user account
-  - Body: `{ email, password, firstName?, lastName?, phone?, handicapType? }`
-- `POST /api/auth/login` - Authenticate user
-  - Body: `{ email, password }`
-- `GET /api/auth/me` - Get current authenticated user (requires auth token)
-- `POST /api/auth/logout` - Logout current user (requires auth token)
-- `POST /api/auth/refresh` - Refresh access token
-  - Body: `{ refresh_token }`
+### Authentification
 
-### Health Check
+- `POST /api/auth/signup` - Créer un compte
+- `POST /api/auth/login` - Se connecter
+- `POST /api/auth/logout` - Se déconnecter
+- `GET /api/auth/me` - Récupérer les infos utilisateur (requiert authentification)
+- `PUT /api/auth/me` - Mettre à jour le profil (requiert authentification)
+- `POST /api/auth/refresh` - Rafraîchir le token
 
-- `GET /health` - Server health check
+### Santé
 
-## Authentication
+- `GET /health` - Vérifier l'état du serveur
 
-All protected endpoints require an `Authorization` header:
+## Structure
 
 ```
-Authorization: Bearer <access_token>
+backend/
+├── config/
+│   ├── supabase.js      # Configuration Supabase (Auth)
+│   └── db.js            # Connexion directe à Postgres
+├── middleware/
+│   └── auth.js          # Middleware d'authentification
+├── routes/
+│   └── auth.js          # Routes d'authentification
+├── index.js             # Point d'entrée du serveur
+├── package.json
+└── .env                 # Variables d'environnement (à créer)
 ```
 
-The access token is returned in the `session` object after login/signup.
+## Base de données Supabase
 
-## Architecture
+Le backend utilise deux méthodes de connexion à Supabase :
 
-### Connexions Supabase
+1. **Supabase Auth** (`@supabase/supabase-js`) :
+   - Gère l'authentification des utilisateurs
+   - Stockage des sessions
+   - Tokens JWT
+   - Les métadonnées utilisateur (firstName, lastName, handicapType) sont stockées dans `user_metadata` de Supabase Auth
 
-Ce projet utilise deux connexions distinctes à Supabase :
+2. **Connexion directe Postgres** (`postgres`) :
+   - Connexion directe à la base de données Postgres
+   - Permet d'exécuter des requêtes SQL directement
+   - Utile pour des opérations complexes ou des migrations
+   - Importez avec : `import sql from './config/db.js'`
 
-1. **Prisma ORM** → Connexion directe à PostgreSQL via `DATABASE_URL`
+### Exemple d'utilisation de la DB
 
-   - Gère toutes les opérations CRUD sur les tables
-   - Pas besoin des API keys Supabase pour la base de données
-   - Utilise la connection string PostgreSQL standard
+```javascript
+import sql from './config/db.js';
 
-2. **Supabase Auth Client** → Connexion via API keys pour l'authentification
-   - Gère l'inscription, connexion, et gestion des sessions
-   - Utilise `SUPABASE_URL`, `SUPABASE_ANON_KEY`, et `SUPABASE_SERVICE_ROLE_KEY`
-   - Les utilisateurs sont créés dans Supabase Auth, puis synchronisés avec la table `users` via Prisma
+// Exécuter une requête
+const users = await sql`SELECT * FROM users WHERE id = ${userId}`;
 
-### Pourquoi cette architecture ?
-
-- **Prisma** offre une meilleure expérience développeur avec TypeScript et des migrations robustes
-- **Supabase Auth** gère l'authentification, les tokens JWT, et la sécurité
-- Les deux travaillent ensemble : Auth crée les utilisateurs, Prisma gère leurs profils dans la DB
-
-## Tech Stack
-
-- **Express.js**: Web framework
-- **TypeScript**: Type-safe JavaScript
-- **Prisma**: Modern ORM for database operations (connexion directe PostgreSQL)
-- **Supabase Auth**: Authentication service (via API keys)
-- **PostgreSQL**: Database (hébergée sur Supabase)
-- **express-validator**: Request validation
-
-## Configuration Render
-
-**Important** : Si Render utilise `yarn` au lieu de `npm` :
-
-1. Allez dans votre service Render > **Settings**
-2. Dans la section **Build & Deploy**, trouvez **Build Command**
-3. Assurez-vous que le **Build Command** est : `npm run build`
-4. Si Render détecte automatiquement yarn, vous pouvez forcer npm en :
-   - Supprimant tout fichier `yarn.lock` du repository
-   - Ou en configurant explicitement npm dans les paramètres Render
-
-Le script `build` dans `package.json` inclut automatiquement `prisma generate && tsc`, donc Prisma Client sera généré lors du build.
+// Insérer des données
+await sql`INSERT INTO centers (name, address) VALUES (${name}, ${address})`;
+```

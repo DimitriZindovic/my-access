@@ -1,12 +1,11 @@
 "use client"
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { MapPin } from 'lucide-react';
 import { Center } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 interface MapViewProps {
@@ -43,14 +42,11 @@ export function MapView({ centers, selectedCenter, onSelectCenter }: MapViewProp
 
         {/* Center Markers */}
         {centers.map((center, index) => {
-          // Position relative to Paris (simplified positioning)
-          const offsetX = (center.longitude - 2.3522) * 2000;
-          const offsetY = -(center.latitude - 48.8566) * 2000;
 
           const iconHTML = new L.DivIcon({
             className: `w-8! h-8! rounded-full ${getScoreColor(center.globalScore)} 
                         flex! items-center justify-center text-white shadow-lg 
-                        ${selectedCenter?.id === center.id ? 'ring-4 ring-primary' : ''}`, // Classe CSS pour le style global
+                        ${selectedCenter?.id === center.id ? 'ring-4 ring-primary' : ''}`,
             html: `<div aria-label="${center.name}, score ${center.globalScore}/5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-icon lucide-map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></div>`,
             iconSize: [32, 32],
             iconAnchor: [16, 16],

@@ -98,7 +98,7 @@ export function CenterCard({ center, onViewDetails }: CenterCardProps) {
           </div>
         </div>
 
-        <Button onClick={() => onViewDetails(center)} className="w-full">
+        <Button onClick={() => onViewDetails(center)} className="w-full" aria-label={`Voir les détails du centre : ${center.name}`}>
           Voir les détails
         </Button>
       </CardContent>

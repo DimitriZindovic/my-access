@@ -1,6 +1,7 @@
 import express from "express";
 import { supabaseAdmin, supabase } from "../config/supabase.js";
 import { authenticateToken } from "../middleware/auth.js";
+import sql from "../config/db.js";
 
 const router = express.Router();
 
@@ -54,6 +55,25 @@ router.post("/signup", async (req, res) => {
       handicapType: authData.user.user_metadata?.handicap_type || null,
     };
 
+    try {
+      await sql`
+        INSERT INTO users (id, email, first_name, last_name, handicap_type, created_at, updated_at)
+        VALUES (
+          ${authData.user.id},
+          ${authData.user.email},
+          ${authData.user.user_metadata?.first_name || null},
+          ${authData.user.user_metadata?.last_name || null},
+          ${authData.user.user_metadata?.handicap_type || null},
+          NOW(),
+          NOW()
+        )
+        ON CONFLICT (id) DO UPDATE SET
+          updated_at = NOW()
+      `;
+    } catch (dbError) {
+      console.error("Erreur synchronisation DB:", dbError);
+    }
+
     res.status(201).json({
       message: "Compte créé avec succès",
       user,
@@ -101,6 +121,25 @@ router.post("/login", async (req, res) => {
       handicapType: authData.user.user_metadata?.handicap_type || null,
     };
 
+    try {
+      await sql`
+        INSERT INTO users (id, email, first_name, last_name, handicap_type, created_at, updated_at)
+        VALUES (
+          ${authData.user.id},
+          ${authData.user.email},
+          ${authData.user.user_metadata?.first_name || null},
+          ${authData.user.user_metadata?.last_name || null},
+          ${authData.user.user_metadata?.handicap_type || null},
+          NOW(),
+          NOW()
+        )
+        ON CONFLICT (id) DO UPDATE SET
+          updated_at = NOW()
+      `;
+    } catch (dbError) {
+      console.error("Erreur synchronisation DB:", dbError);
+    }
+
     res.json({
       user,
       session,
@@ -127,6 +166,22 @@ router.post("/logout", authenticateToken, async (req, res) => {
 router.get("/me", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
+
+    const dbUser = await sql`
+      SELECT * FROM users WHERE id = ${userId}
+    `;
+
+    if (dbUser.length > 0) {
+      const user = {
+        id: dbUser[0].id,
+        email: dbUser[0].email,
+        firstName: dbUser[0].first_name,
+        lastName: dbUser[0].last_name,
+        handicapType: dbUser[0].handicap_type,
+        createdAt: dbUser[0].created_at.toISOString(),
+      };
+      return res.json(user);
+    }
 
     const { data: userData, error } =
       await supabaseAdmin.auth.admin.getUserById(userId);
@@ -170,13 +225,32 @@ router.put("/me", authenticateToken, async (req, res) => {
       return res.status(400).json({ error: error.message });
     }
 
+    try {
+      await sql`
+        UPDATE users
+        SET 
+          first_name = ${updates.first_name !== undefined ? updates.first_name : sql`first_name`},
+          last_name = ${updates.last_name !== undefined ? updates.last_name : sql`last_name`},
+          handicap_type = ${updates.handicap_type !== undefined ? updates.handicap_type : sql`handicap_type`},
+          phone = ${updates.phone !== undefined ? updates.phone : sql`phone`},
+          updated_at = NOW()
+        WHERE id = ${userId}
+      `;
+    } catch (dbError) {
+      console.error("Erreur synchronisation DB:", dbError);
+    }
+
+    const dbUser = await sql`
+      SELECT * FROM users WHERE id = ${userId}
+    `;
+
     const user = {
       id: data.user.id,
       email: data.user.email,
-      firstName: data.user.user_metadata?.first_name || null,
-      lastName: data.user.user_metadata?.last_name || null,
-      handicapType: data.user.user_metadata?.handicap_type || null,
-      createdAt: data.user.created_at,
+      firstName: dbUser[0]?.first_name || data.user.user_metadata?.first_name || null,
+      lastName: dbUser[0]?.last_name || data.user.user_metadata?.last_name || null,
+      handicapType: dbUser[0]?.handicap_type || data.user.user_metadata?.handicap_type || null,
+      createdAt: dbUser[0]?.created_at?.toISOString() || data.user.created_at,
     };
 
     res.json(user);

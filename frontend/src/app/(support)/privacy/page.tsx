@@ -14,7 +14,7 @@ export default function PrivacyPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  AccessiSanté collecte les données personnelles suivantes :
+                  MyAccess collecte les données personnelles suivantes :
                 </p>
                 <ul className="list-disc list-inside space-y-1">
                   <li>Nom et prénom</li>

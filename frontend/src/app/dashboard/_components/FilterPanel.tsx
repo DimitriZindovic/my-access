@@ -51,7 +51,7 @@ export function FilterPanel({
         {/* Type de centre */}
         <div>
           <Label className="mb-3 block">Type de centre</Label>
-          <Select value={centerType} onValueChange={(value: any) => onCenterTypeChange(value)}>
+          <Select value={centerType} onValueChange={(value: any) => onCenterTypeChange(value)} aria-label="Sélectionner le type de centre">
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -77,6 +77,7 @@ export function FilterPanel({
             max={5}
             step={0.5}
             className="mb-2"
+            aria-label="Score d'accessibilité minimum"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>0</span>

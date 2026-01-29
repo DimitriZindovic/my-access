@@ -10,7 +10,7 @@ export default function AccessibilityStatement() {
           <Card className="mb-6">
             <CardContent className="pt-6">
               <p>
-                AccessiSanté s'engage à rendre son site web accessible conformément au 
+                MyAccess s'engage à rendre son site web accessible conformément au 
                 Référentiel Général d'Amélioration de l'Accessibilité (RGAA).
               </p>
             </CardContent>

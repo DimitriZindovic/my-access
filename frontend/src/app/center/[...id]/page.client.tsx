@@ -286,6 +286,7 @@ export default function CenterDetailsClient({ idCenter }: CenterDetailsClientPro
                     className="w-full" 
                     size="lg"
                     onClick={() => onBookAppointment(center)}
+                    disabled
                   >
                     <Calendar className="mr-2 h-5 w-5" />
                     Prendre rendez-vous

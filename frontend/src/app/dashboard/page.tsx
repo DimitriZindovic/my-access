@@ -9,7 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FilterPanel } from './_components/FilterPanel';
 import { CenterCard } from './_components/CenterCard';
-import { MapView } from './_components/MapView';
+import dynamic from 'next/dynamic';
+
+const MapView = dynamic(() => import('./_components/MapView').then((mod) => mod.MapView), { 
+  ssr: false,
+});
 
 interface DashboardProps {
   user: User | null;
@@ -62,6 +66,7 @@ export default function Dashboard({ user, onNavigate }: DashboardProps) {
   }, [centers, searchQuery, minScore, centerType]);
 
   const handleViewDetails = (center: Center) => {
+    if(typeof window === "undefined") return;
     window.location.href = "center/" + center.id
   };
 
@@ -71,19 +76,19 @@ export default function Dashboard({ user, onNavigate }: DashboardProps) {
         {/* Search Bar */}
         <div className="mb-6">
           <div className="flex gap-3 max-w-3xl">
-            <div className="flex-1 relative">
+            <div className="flex-1 relative border rounded">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 placeholder="Rechercher par ville, code postal, nom du centre..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-white"
               />
             </div>
-            <Button variant="outline" className="gap-2">
+            {/*<Button variant="outline" className="gap-2">
               <Map className="h-4 w-4" />
               Itinéraire
-            </Button>
+            </Button>*/}
           </div>
         </div>
 
@@ -109,11 +114,11 @@ export default function Dashboard({ user, onNavigate }: DashboardProps) {
 
               <Tabs value={viewMode} onValueChange={(v: any) => setViewMode(v)}>
                 <TabsList>
-                  <TabsTrigger value="map" className="gap-2">
+                  <TabsTrigger value="map" className="gap-2" aria-label='Afficher la carte des centres'>
                     <Map className="h-4 w-4" />
                     Carte
                   </TabsTrigger>
-                  <TabsTrigger value="list" className="gap-2">
+                  <TabsTrigger value="list" className="gap-2" aria-label='Afficher la liste des centres'>
                     <List className="h-4 w-4" />
                     Liste
                   </TabsTrigger>

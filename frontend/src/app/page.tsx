@@ -16,10 +16,10 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
       <section className="bg-gradient-to-b from-primary/5 to-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="mb-6">
+            <h1 className='text-2xl'>
               Trouvez un centre de santé <br/>
-              <span className="text-primary">100% accessible</span>
             </h1>
+            <h2 className="text-primary text-xl mb-6">100% accessible</h2>
             <p className="text-xl text-muted-foreground mb-8">
               Recherchez, comparez et prenez rendez-vous dans des centres de dépistage 
               et vaccination adaptés à vos besoins d'accessibilité.
@@ -55,7 +55,7 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="mb-4">Pourquoi choisir AccessiSanté ?</h2>
+            <h2 className="mb-4">Pourquoi choisir MyAccess ?</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Une plateforme pensée pour tous, avec des informations détaillées 
               sur l'accessibilité de chaque centre.

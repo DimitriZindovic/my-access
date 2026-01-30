@@ -7,19 +7,18 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { getCurrentUser, getNotifications, markNotificationAsRead } from '@/lib/mockData';
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NotificationsProps {
   user: User;
 }
 
 export default function Notifications() {
-  const [user, setUser] =  useState(null as User | null);
+  const {user} = useAuth()
   const [notifications, setNotifications] =  useState<Notification[]>([]);
   const [unreadCount, setUnreadNotifications] = useState(0)
 
   useEffect(() => { 
-      const user : User | null = getCurrentUser()
-      setUser(user)
       const notifications : Notification[] = getNotifications(user!.id)
       setNotifications(notifications)
       const unreadCount = notifications.filter(n => !n.read).length;

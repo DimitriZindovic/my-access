@@ -38,16 +38,16 @@ export interface Review {
   date: string;
   scores: AccessibilityScore;
   comment: string;
-  handicapTypes: HandicapType[];
+  handicapTypes: string[];
   helpfulCount: number;
 }
 
 export interface User {
   id: string;
   email: string;
-  name: string;
-  handicapTypes: HandicapType[];
-  createdAt: string;
+  firstName: string | null;
+  lastName: string | null;
+  handicapType: string | null;
 }
 
 export interface Appointment {

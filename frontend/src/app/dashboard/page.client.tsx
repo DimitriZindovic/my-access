@@ -24,7 +24,7 @@ interface DashboardProps {
 export default function DashboardClient({ user, onNavigate }: DashboardProps) {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState( searchParams.get("q") ?? '');
-  const [selectedHandicaps, setSelectedHandicaps] = useState<HandicapType[]>(user?.handicapTypes || []);
+  const [selectedHandicaps, setSelectedHandicaps] = useState<string[]>(user?.handicapType?.split(";") || []);
   const [minScore, setMinScore] = useState(0);
   const [centerType, setCenterType] = useState<'all' | 'vaccination' | 'depistage' | 'both'>('all');
   const [selectedCenter, setSelectedCenter] = useState<Center | null>(null);

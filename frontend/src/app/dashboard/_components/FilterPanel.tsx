@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Filter } from 'lucide-react';
 
 interface FilterPanelProps {
-  selectedHandicaps: HandicapType[];
-  onHandicapChange: (handicaps: HandicapType[]) => void;
+  selectedHandicaps: string[];
+  onHandicapChange: (handicaps: string[]) => void;
   minScore: number;
   onMinScoreChange: (score: number) => void;
   centerType: 'all' | 'vaccination' | 'depistage' | 'both';

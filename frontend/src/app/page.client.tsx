@@ -8,16 +8,12 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { User } from '@/types';
 import { getCurrentUser } from '@/lib/mockData';
+import { useAuth } from '@/contexts/AuthContext';
 
 
 export default function LandingPageClient() {
   const [searchValue, setSearchValue] = useState<string>("")
-  const [user, setUser] =  useState(null as User | null);
-
-  useEffect(() => { 
-        const user : User | null = getCurrentUser()
-        setUser(user)
-  }, [])
+  const {user} = useAuth()
 
   return (
     <div className="min-h-screen">

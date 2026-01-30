@@ -29,7 +29,7 @@ export function RatingForm({ center, user, onSubmit, onCancel }: RatingFormProps
     accueil: 0,
   });
   const [comment, setComment] = useState('');
-  const [selectedHandicaps, setSelectedHandicaps] = useState<HandicapType[]>(user.handicapTypes);
+  const [selectedHandicaps, setSelectedHandicaps] = useState<string[]>(user.handicapType?.split(';') || []);
   const [hoveredScores, setHoveredScores] = useState({
     physique: 0,
     numerique: 0,
@@ -47,7 +47,7 @@ export function RatingForm({ center, user, onSubmit, onCancel }: RatingFormProps
     const review: Review = {
       id: Date.now().toString(),
       userId: user.id,
-      userName: user.name,
+      userName: user.firstName + " " + user.lastName,
       centerId: center.id,
       date: new Date().toISOString(),
       scores,

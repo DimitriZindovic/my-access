@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { RatingForm } from './_components/RatingForm';
 import { getCenter, getCurrentUser } from '@/lib/mockData';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CenterDetailsClientProps {
   idCenter : string;
@@ -17,12 +18,11 @@ interface CenterDetailsClientProps {
 export default function CenterDetailsClient({ idCenter }: CenterDetailsClientProps) {
   const [showRatingForm, setShowRatingForm] = useState(false);
 
-  const [user, setUser] =  useState(null as User | null);
+  const {user} = useAuth()
+  
   const [center, setCenter] = useState(undefined as Center | undefined);
 
   useEffect(() => { 
-    const user : User | null = getCurrentUser()
-    setUser(user)
     const center : Center | undefined = getCenter(idCenter)
     setCenter(center)
     }, [])
